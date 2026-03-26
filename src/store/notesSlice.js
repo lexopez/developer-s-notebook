@@ -10,23 +10,74 @@ const initialState = {
     {
       id: "n1",
       folderId: "f1",
-      title: "Vue Composition API",
-      category: "code snippets",
-      content: "const count = ref(0);",
+      title: "React js",
+      data: {
+        "code snippets": [
+          {
+            id: "c1",
+            label: "Counter Hook",
+            code: "const [count, setCount] = useState(0);",
+          },
+          {
+            id: "c2",
+            label: "useEffect Cleanup",
+            code: "return () => clearInterval(timer);",
+          },
+        ],
+        "side projects": [
+          { id: "p1", name: "Weather Dashboard", status: "In Progress" },
+        ],
+        resources: [{ id: "r1", title: "Beta React Docs", url: "react.dev" }],
+        notes: [{ id: "g1", text: "Remember that props are read-only." }],
+      },
     },
     {
       id: "n2",
       folderId: "f1",
       title: "Tailwind Config",
-      category: "resources",
-      content: 'module.exports = { darkMode: "class" }',
+      data: {
+        "code snippets": [
+          {
+            id: "c1",
+            label: "Counter Hook",
+            code: "const [count, setCount] = useState(0);",
+          },
+          {
+            id: "c2",
+            label: "useEffect Cleanup",
+            code: "return () => clearInterval(timer);",
+          },
+        ],
+        "side projects": [
+          { id: "p1", name: "Weather Dashboard", status: "In Progress" },
+        ],
+        resources: [{ id: "r1", title: "Beta React Docs", url: "react.dev" }],
+        notes: [{ id: "g1", text: "Remember that props are read-only." }],
+      },
     },
     {
       id: "n3",
       folderId: "f2",
       title: "Node 25 Features",
-      category: "notes",
-      content: "Check out the new V8 engine updates.",
+      data: {
+        "code snippets": [
+          {
+            id: "c1",
+            label: "Counter Hook",
+            code: "const [count, setCount] = useState(0);",
+          },
+          {
+            id: "c2",
+            label: "useEffect Cleanup",
+            code: "return () => clearInterval(timer);",
+          },
+        ],
+        "side projects": [
+          { id: "p1", name: "Weather Dashboard", status: "In Progress" },
+        ],
+        resources: [{ id: "r1", title: "Beta React Docs", url: "react.dev" }],
+        notes: [{ id: "g1", text: "Remember that props are read-only." }],
+      },
     },
   ],
   activeFolderId: "f1",
@@ -54,9 +105,37 @@ const notesSlice = createSlice({
     toggleTheme: (state) => {
       state.theme = state.theme === "light" ? "dark" : "light";
     },
+    addFolder: (state, action) => {
+      const newFolder = {
+        id: Date.now().toString(), // Temporary ID until Supabase
+        name: action.payload,
+      };
+      state.folders.push(newFolder);
+    },
+    addNote: (state, action) => {
+      const newNote = {
+        id: Date.now().toString(),
+        folderId: state.activeFolderId,
+        title: action.payload,
+        data: {
+          "code snippets": [],
+          "side projects": [],
+          resources: [],
+          notes: [],
+        },
+      };
+      state.notes.push(newNote);
+      state.activeNoteId = newNote.id; // Auto-select new note
+    },
   },
 });
 
-export const { setActiveFolder, setActiveNote, setCategory, toggleTheme } =
-  notesSlice.actions;
+export const {
+  setActiveFolder,
+  setActiveNote,
+  setCategory,
+  toggleTheme,
+  addNote,
+  addFolder,
+} = notesSlice.actions;
 export default notesSlice.reducer;

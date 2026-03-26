@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   Folder,
@@ -10,12 +10,17 @@ import {
   Hash,
   Moon,
   Sun,
+  Plus,
+  X,
+  Check,
 } from "lucide-react";
 import {
   setActiveFolder,
   setCategory,
   setActiveNote,
   toggleTheme,
+  addNote,
+  addFolder,
 } from "../store/notesSlice";
 
 const DeveloperNotebook = () => {
@@ -28,6 +33,12 @@ const DeveloperNotebook = () => {
     activeCategory,
     theme,
   } = useSelector((state) => state.notes);
+
+  const [isAddingNote, setIsAddingNote] = useState(false);
+  const [newNoteTitle, setNewNoteTitle] = useState("");
+
+  const [isAddingFolder, setIsAddingFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
 
   // Sync theme with the DOM
   useEffect(() => {
@@ -46,15 +57,22 @@ const DeveloperNotebook = () => {
     { id: "notes", label: "Just Notes", icon: <StickyNote size={16} /> },
   ];
 
-  const filteredNotes = notes.filter((n) => n.folderId === activeFolderId);
-
   // Logic to find what to show
-  const notesInFolder = notes.filter((n) => n.folderId === activeFolderId);
-  const displayNotes =
-    activeCategory === "all"
-      ? notesInFolder
-      : notesInFolder.filter((n) => n.category === activeCategory);
+  // ADD THIS: Sidebar only cares about the folder
+  const sidebarNotes = notes.filter((n) => n.folderId === activeFolderId);
   const currentNote = notes.find((n) => n.id === activeNoteId);
+
+  // Helper to get the specific list to display in the main box
+  const getActiveContent = () => {
+    if (!currentNote) return [];
+    if (activeCategory === "all") {
+      // Combine all categories into one list for "All" view
+      return Object.values(currentNote.data).flat();
+    }
+    return currentNote.data[activeCategory] || [];
+  };
+
+  const contentToDisplay = getActiveContent();
 
   return (
     <div className="h-screen w-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden px-[10vw] py-[10vh]">
@@ -75,11 +93,45 @@ const DeveloperNotebook = () => {
       <div className="w-full h-full flex gap-4">
         {/* LEFT BOX: Notes List (15%) */}
         <aside className="w-[15%] h-full overflow-y-auto pr-2">
-          <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 px-2">
-            {folders.find((f) => f.id === activeFolderId)?.name || "Notes"}
-          </h3>
-          <div className="space-y-1">
-            {displayNotes.map((note) => (
+          <div className="flex items-center justify-between mb-4 px-2">
+            <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              {folders.find((f) => f.id === activeFolderId)?.name || "Notes"}
+            </h3>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsAddingNote(true);
+              }}
+              className="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer"
+            >
+              {isAddingNote ? <X size={20} /> : <Plus size={20} />}
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto space-y-1">
+            {isAddingNote && (
+              <div className="p-2 mb-2 animate-in fade-in zoom-in-95 duration-200">
+                <input
+                  autoFocus
+                  className="w-full bg-white dark:bg-slate-800 border border-blue-400 rounded-lg p-2 text-sm outline-none text-white"
+                  placeholder="Note title..."
+                  value={newNoteTitle}
+                  onChange={(e) => setNewNoteTitle(e.target.value)}
+                  onBlur={(e) => {
+                    e.stopPropagation();
+                    setIsAddingNote(false);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      if (!newNoteTitle) return;
+                      dispatch(addNote(newNoteTitle));
+                      setIsAddingNote(false);
+                      setNewNoteTitle("");
+                    }
+                  }}
+                />
+              </div>
+            )}
+            {sidebarNotes.map((note) => (
               <button
                 key={note.id}
                 onClick={() => dispatch(setActiveNote(note.id))}
@@ -130,10 +182,44 @@ const DeveloperNotebook = () => {
                 <h1 className="text-4xl font-extrabold text-slate-800 dark:text-slate-100 mb-6">
                   {currentNote.title}
                 </h1>
-                <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                  <pre className="text-slate-600 dark:text-slate-400 font-mono whitespace-pre-wrap">
-                    {currentNote.content}
-                  </pre>
+                <div className="grid gap-4">
+                  {contentToDisplay.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800"
+                    >
+                      {/* Render Code Snippets */}
+                      {item.code && (
+                        <div>
+                          <span className="text-[10px] font-bold text-blue-500 uppercase mb-2 block">
+                            {item.label}
+                          </span>
+                          <pre className="text-sm font-mono text-slate-600 dark:text-slate-400">
+                            {item.code}
+                          </pre>
+                        </div>
+                      )}
+
+                      {/* Render Projects */}
+                      {item.status && (
+                        <div className="flex justify-between items-center">
+                          <span className="font-semibold text-slate-700 dark:text-slate-200">
+                            {item.name}
+                          </span>
+                          <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                            {item.status}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Render General Notes */}
+                      {item.text && (
+                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed italic border-l-4 border-blue-500 pl-4">
+                          "{item.text}"
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               </div>
             ) : (
@@ -142,22 +228,48 @@ const DeveloperNotebook = () => {
               </div>
             )}
           </section>
-          <section className="flex-1 p-8 overflow-y-auto">
-            <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-4">
-              Select a note...
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 leading-relaxed">
-              Your documentation environment is ready.
-            </p>
-          </section>
         </main>
 
         {/* RIGHT BOX: Folders (15%) */}
         <aside className="w-[15%] h-full overflow-y-auto pl-2">
-          <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4 px-2">
-            Folders
-          </h3>
-          <div className="space-y-1">
+          <div className="flex items-center justify-between mb-4 px-2">
+            <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              Folders
+            </h3>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsAddingFolder(true);
+              }}
+              className="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer"
+            >
+              {isAddingFolder ? <X size={20} /> : <Plus size={20} />}
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto space-y-1">
+            {isAddingFolder && (
+              <div className="p-2 mb-2">
+                <input
+                  autoFocus
+                  className="w-full bg-slate-200 dark:bg-slate-800 rounded-lg p-2 text-sm outline-none border-b-2 border-blue-500 text-white"
+                  placeholder="Folder name..."
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  onBlur={(e) => {
+                    e.stopPropagation();
+                    setIsAddingFolder(false);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      if (!newFolderName) return;
+                      dispatch(addFolder(newFolderName));
+                      setIsAddingFolder(false);
+                      setNewFolderName("");
+                    }
+                  }}
+                />
+              </div>
+            )}
             {folders.map((folder) => (
               <button
                 key={folder.id}

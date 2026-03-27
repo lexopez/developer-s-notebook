@@ -111,6 +111,7 @@ const notesSlice = createSlice({
         name: action.payload,
       };
       state.folders.push(newFolder);
+      state.activeFolderId = newFolder.id;
     },
     addNote: (state, action) => {
       const newNote = {

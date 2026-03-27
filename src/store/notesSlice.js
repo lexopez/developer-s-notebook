@@ -127,6 +127,23 @@ const notesSlice = createSlice({
       state.notes.push(newNote);
       state.activeNoteId = newNote.id; // Auto-select new note
     },
+    deleteFolder: (state, action) => {
+      state.folders = state.folders.filter((f) => f.id !== action.payload);
+      state.notes = state.notes.filter((n) => n.folderId !== action.payload);
+      if (state.activeFolderId === action.payload) state.activeFolderId = null;
+    },
+    renameFolder: (state, action) => {
+      const folder = state.folders.find((f) => f.id === action.payload.id);
+      if (folder) folder.name = action.payload.name;
+    },
+    deleteNote: (state, action) => {
+      state.notes = state.notes.filter((n) => n.id !== action.payload);
+      if (state.activeNoteId === action.payload) state.activeNoteId = null;
+    },
+    renameNote: (state, action) => {
+      const note = state.notes.find((n) => n.id === action.payload.id);
+      if (note) note.title = action.payload.name;
+    },
   },
 });
 
@@ -137,5 +154,9 @@ export const {
   toggleTheme,
   addNote,
   addFolder,
+  deleteFolder,
+  renameFolder,
+  deleteNote,
+  renameNote,
 } = notesSlice.actions;
 export default notesSlice.reducer;

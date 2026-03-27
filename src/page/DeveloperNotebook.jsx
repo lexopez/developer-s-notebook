@@ -285,7 +285,7 @@ const DeveloperNotebook = () => {
             </div>
           </nav>
 
-          <section className="flex-1 p-10 overflow-y-auto">
+          <section className="flex-1 p-10 overflow-y-auto no-scrollbar">
             {currentNote ? (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <h1 className="text-4xl font-extrabold text-slate-800 dark:text-slate-100 mb-6">

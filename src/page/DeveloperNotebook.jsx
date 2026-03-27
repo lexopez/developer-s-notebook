@@ -120,7 +120,7 @@ const DeveloperNotebook = () => {
                 e.stopPropagation();
                 setIsAddingNote(true);
               }}
-              className="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer"
+              className="text-slate-400 hover:text-cyan-500 transition-colors cursor-pointer"
             >
               {isAddingNote ? <X size={20} /> : <Plus size={20} />}
             </button>
@@ -130,7 +130,7 @@ const DeveloperNotebook = () => {
               <div className="p-2 mb-2 animate-in fade-in zoom-in-95 duration-200">
                 <input
                   autoFocus
-                  className="w-full bg-white dark:bg-slate-800 border border-blue-400 rounded-lg p-2 text-sm outline-none text-white"
+                  className="w-full bg-slate-200 text-slate-600 dark:text-slate-200 dark:bg-slate-800/50 rounded-lg p-2 text-sm outline-none border-b-2 border-cyan-500 "
                   placeholder="Note title..."
                   value={newNoteTitle}
                   onChange={(e) => setNewNoteTitle(e.target.value)}
@@ -149,12 +149,13 @@ const DeveloperNotebook = () => {
                 />
               </div>
             )}
+
             {sidebarNotes.map((note) => (
               <div key={note.id} className="group relative">
                 {editingId === note.id ? (
                   <input
                     autoFocus
-                    className="w-full bg-white dark:bg-slate-800 border border-blue-500 rounded-xl p-3 text-sm outline-none"
+                    className="w-full bg-white dark:bg-slate-800 border border-cyan-500 rounded-xl p-3 text-sm outline-none"
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
                     onBlur={() => setEditingId(null)}
@@ -171,7 +172,7 @@ const DeveloperNotebook = () => {
                       onClick={() => dispatch(setActiveNote(note.id))}
                       className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                         activeNoteId === note.id
-                          ? "bg-blue-50 dark:bg-blue-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
+                          ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
                           : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
                       }`}
                     >
@@ -191,7 +192,7 @@ const DeveloperNotebook = () => {
                       <MoreVertical size={16} />
                     </button>
                     {/* The Dropdown Menu */}
-                    {menuConfig.id && (
+                    {menuConfig.id && menuConfig.id === note.id && (
                       <>
                         <div
                           className="fixed inset-0 z-60"
@@ -199,6 +200,7 @@ const DeveloperNotebook = () => {
                             setMenuConfig({ id: null, x: 0, y: 0 })
                           }
                         />
+
                         <div
                           style={{
                             top: `${menuConfig.y}px`,
@@ -208,6 +210,7 @@ const DeveloperNotebook = () => {
                         >
                           <button
                             onClick={() => {
+                              console.log("test");
                               setEditingId(menuConfig.id);
                               const note = sidebarNotes.find(
                                 (n) => n.id === menuConfig.id,
@@ -248,7 +251,7 @@ const DeveloperNotebook = () => {
                   onClick={() => dispatch(setCategory(cat.id))}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
                     activeCategory === cat.id
-                      ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                      ? "bg-white dark:bg-slate-700 text-cyan-600 dark:text-cyan-400 shadow-sm"
                       : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                   }`}
                 >
@@ -274,7 +277,7 @@ const DeveloperNotebook = () => {
                       {/* Render Code Snippets */}
                       {item.code && (
                         <div>
-                          <span className="text-[10px] font-bold text-blue-500 uppercase mb-2 block">
+                          <span className="text-[10px] font-bold text-cyan-500 uppercase mb-2 block">
                             {item.label}
                           </span>
                           <pre className="text-sm font-mono text-slate-600 dark:text-slate-400">
@@ -297,7 +300,7 @@ const DeveloperNotebook = () => {
 
                       {/* Render General Notes */}
                       {item.text && (
-                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed italic border-l-4 border-blue-500 pl-4">
+                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed italic border-l-4 border-cyan-500 pl-4">
                           "{item.text}"
                         </p>
                       )}
@@ -324,7 +327,7 @@ const DeveloperNotebook = () => {
                 e.stopPropagation();
                 setIsAddingFolder(true);
               }}
-              className="text-slate-400 hover:text-blue-500 transition-colors cursor-pointer"
+              className="text-slate-400 hover:text-cyan-500 transition-colors cursor-pointer"
             >
               {isAddingFolder ? <X size={20} /> : <Plus size={20} />}
             </button>
@@ -334,7 +337,7 @@ const DeveloperNotebook = () => {
               <div className="p-2 mb-2">
                 <input
                   autoFocus
-                  className="w-full bg-slate-200 dark:bg-slate-800 rounded-lg p-2 text-sm outline-none border-b-2 border-blue-500 text-white"
+                  className="w-full bg-slate-200 text-slate-600 dark:text-slate-200 dark:bg-slate-800/50 rounded-lg p-2 text-sm outline-none border-b-2 border-cyan-500 "
                   placeholder="Folder name..."
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
@@ -358,7 +361,7 @@ const DeveloperNotebook = () => {
                 {editingId === folder.id ? (
                   <input
                     autoFocus
-                    className="w-full bg-white dark:bg-slate-800 border border-blue-500 rounded-xl p-3 text-sm outline-none"
+                    className="w-full bg-white dark:bg-slate-800 border border-cyan-500 rounded-xl p-3 text-sm outline-none"
                     value={editValue}
                     onChange={(e) => setEditValue(e.target.value)}
                     onBlur={() => setEditingId(null)}
@@ -377,7 +380,7 @@ const DeveloperNotebook = () => {
                       onClick={() => dispatch(setActiveFolder(folder.id))}
                       className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
                         activeFolderId === folder.id
-                          ? "bg-blue-50 dark:bg-blue-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
+                          ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
                           : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
                       }`}
                     >
@@ -403,7 +406,7 @@ const DeveloperNotebook = () => {
                       <MoreVertical size={16} />
                     </button>
                     {/* The Dropdown Menu */}
-                    {menuConfig.id && (
+                    {menuConfig.id && menuConfig.id === folder.id && (
                       <>
                         <div
                           className="fixed inset-0 z-60"

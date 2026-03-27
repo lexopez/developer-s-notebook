@@ -130,6 +130,7 @@ const DeveloperNotebook = () => {
               <div className="p-2 mb-2 animate-in fade-in zoom-in-95 duration-200">
                 <input
                   autoFocus
+                  maxLength={40}
                   className="w-full bg-slate-200 text-slate-600 dark:text-slate-200 dark:bg-slate-800/50 rounded-lg p-2 text-sm outline-none border-b-2 border-cyan-500 "
                   placeholder="Note title..."
                   value={newNoteTitle}
@@ -140,32 +141,54 @@ const DeveloperNotebook = () => {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      if (!newNoteTitle || !activeFolderId) return;
+                      if (
+                        !newNoteTitle.trim() ||
+                        newNoteTitle.length > 40 ||
+                        !activeFolderId
+                      )
+                        return;
                       dispatch(addNote(newNoteTitle));
                       setIsAddingNote(false);
                       setNewNoteTitle("");
                     }
                   }}
                 />
+                {newNoteTitle.length >= 30 && (
+                  <p className="text-[9px] text-orange-500 mt-1 px-1">
+                    {40 - newNoteTitle.length} characters remaining
+                  </p>
+                )}
               </div>
             )}
 
             {sidebarNotes.map((note) => (
               <div key={note.id} className="group relative">
                 {editingId === note.id ? (
-                  <input
-                    autoFocus
-                    className="w-full bg-white dark:bg-slate-800 border border-cyan-500 rounded-xl p-3 text-sm outline-none"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onBlur={() => setEditingId(null)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        dispatch(renameNote({ id: note.id, name: editValue }));
-                        setEditingId(null);
-                      }
-                    }}
-                  />
+                  <>
+                    <input
+                      autoFocus
+                      maxLength={40}
+                      className="w-full bg-white dark:text-slate-200 dark:bg-slate-800 border border-cyan-500 rounded-xl p-3 text-sm outline-none"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => setEditingId(null)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          if (!editValue.trim() || editValue.length > 40)
+                            return;
+                          dispatch(
+                            renameNote({ id: note.id, name: editValue }),
+                          );
+                          setEditingId(null);
+                        }
+                      }}
+                    />
+                    {editValue.length >= 30 && (
+                      <p className="text-[9px] text-orange-500 mt-1 px-1">
+                        {40 - editValue.length} characters remaining
+                      </p>
+                    )}
+                  </>
                 ) : (
                   <div className="flex items-center">
                     <button
@@ -337,7 +360,8 @@ const DeveloperNotebook = () => {
               <div className="p-2 mb-2">
                 <input
                   autoFocus
-                  className="w-full bg-slate-200 text-slate-600 dark:text-slate-200 dark:bg-slate-800/50 rounded-lg p-2 text-sm outline-none border-b-2 border-cyan-500 "
+                  maxLength={40}
+                  className="w-full bg-slate-200 text-slate-600 dark:text-slate-200 dark:bg-slate-800 rounded-lg p-2 text-sm outline-none border-b-2 border-cyan-500 "
                   placeholder="Folder name..."
                   value={newFolderName}
                   onChange={(e) => setNewFolderName(e.target.value)}
@@ -347,33 +371,49 @@ const DeveloperNotebook = () => {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      if (!newFolderName) return;
+                      if (!newFolderName.trim() || newFolderName.length > 40)
+                        return;
                       dispatch(addFolder(newFolderName));
                       setIsAddingFolder(false);
                       setNewFolderName("");
                     }
                   }}
                 />
+                {newFolderName.length >= 30 && (
+                  <p className="text-[9px] text-orange-500 mt-1 px-1">
+                    {40 - newFolderName.length} characters remaining
+                  </p>
+                )}
               </div>
             )}
             {folders.map((folder) => (
               <div key={folder.id} className="group relative">
                 {editingId === folder.id ? (
-                  <input
-                    autoFocus
-                    className="w-full bg-white dark:bg-slate-800 border border-cyan-500 rounded-xl p-3 text-sm outline-none"
-                    value={editValue}
-                    onChange={(e) => setEditValue(e.target.value)}
-                    onBlur={() => setEditingId(null)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        dispatch(
-                          renameFolder({ id: folder.id, name: editValue }),
-                        );
-                        setEditingId(null);
-                      }
-                    }}
-                  />
+                  <>
+                    <input
+                      autoFocus
+                      maxLength={40}
+                      className="w-full bg-white dark:text-slate-200 dark:bg-slate-800 border border-cyan-500 rounded-xl p-3 text-sm outline-none"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => setEditingId(null)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          if (!editValue.trim() || editValue.length > 40)
+                            return;
+                          dispatch(
+                            renameFolder({ id: folder.id, name: editValue }),
+                          );
+                          setEditingId(null);
+                        }
+                      }}
+                    />
+                    {editValue.length >= 30 && (
+                      <p className="text-[9px] text-orange-500 mt-1 px-1">
+                        {40 - editValue.length} characters remaining
+                      </p>
+                    )}
+                  </>
                 ) : (
                   <div className="flex items-center">
                     <button

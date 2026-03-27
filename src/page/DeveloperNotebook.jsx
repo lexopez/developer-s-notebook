@@ -13,6 +13,8 @@ import {
   Plus,
   X,
   Check,
+  Trash2,
+  Edit3,
 } from "lucide-react";
 import {
   setActiveFolder,
@@ -21,6 +23,10 @@ import {
   toggleTheme,
   addNote,
   addFolder,
+  deleteFolder,
+  renameFolder,
+  deleteNote,
+  renameNote,
 } from "../store/notesSlice";
 
 const DeveloperNotebook = () => {
@@ -36,6 +42,8 @@ const DeveloperNotebook = () => {
 
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [newNoteTitle, setNewNoteTitle] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editValue, setEditValue] = useState("");
 
   const [isAddingFolder, setIsAddingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
@@ -122,7 +130,7 @@ const DeveloperNotebook = () => {
                   }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      if (!newNoteTitle) return;
+                      if (!newNoteTitle || !activeFolderId) return;
                       dispatch(addNote(newNoteTitle));
                       setIsAddingNote(false);
                       setNewNoteTitle("");
@@ -132,25 +140,77 @@ const DeveloperNotebook = () => {
               </div>
             )}
             {sidebarNotes.map((note) => (
-              <button
-                key={note.id}
-                onClick={() => dispatch(setActiveNote(note.id))}
-                className={`w-full text-left p-3 rounded-xl border transition-all ${
-                  activeNoteId === note.id
-                    ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm"
-                    : "border-transparent hover:bg-slate-200/50 dark:hover:bg-slate-800/30"
-                }`}
-              >
-                <span
-                  className={`text-sm font-medium block truncate ${
-                    activeNoteId === note.id
-                      ? "text-blue-600 dark:text-blue-400"
-                      : "text-slate-700 dark:text-slate-300"
-                  }`}
-                >
-                  {note.title}
-                </span>
-              </button>
+              <div key={note.id} className="group relative">
+                {editingId === note.id ? (
+                  <input
+                    autoFocus
+                    className="w-full bg-white dark:bg-slate-800 border border-blue-500 rounded-xl p-3 text-sm outline-none"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => setEditingId(null)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        dispatch(renameNote({ id: note.id, name: editValue }));
+                        setEditingId(null);
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => dispatch(setActiveNote(note.id))}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                        activeNoteId === note.id
+                          ? "bg-blue-50 dark:bg-blue-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
+                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+                      }`}
+                    >
+                      <FileText size={20} />
+                      <span className="text-sm font-medium block truncate">
+                        {note.title}
+                      </span>
+                    </button>
+
+                    {/* Actions appear on hover */}
+                    <div className="absolute right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm p-1 rounded-lg">
+                      <button
+                        onClick={() => {
+                          setEditingId(note.id);
+                          setEditValue(note.title);
+                        }}
+                        className="p-1 hover:text-blue-500 text-slate-400"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                      <button
+                        onClick={() => dispatch(deleteNote(note.id))}
+                        className="p-1 hover:text-red-500 text-slate-400"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              // <button
+              //   key={note.id}
+              //   onClick={() => dispatch(setActiveNote(note.id))}
+              //   className={`w-full text-left p-3 rounded-xl border transition-all ${
+              //     activeNoteId === note.id
+              //       ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm"
+              //       : "border-transparent hover:bg-slate-200/50 dark:hover:bg-slate-800/30"
+              //   }`}
+              // >
+              //   <span
+              //     className={`text-sm font-medium block truncate ${
+              //       activeNoteId === note.id
+              //         ? "text-blue-600 dark:text-blue-400"
+              //         : "text-slate-700 dark:text-slate-300"
+              //     }`}
+              //   >
+              //     {note.title}
+              //   </span>
+              // </button>
             ))}
           </div>
         </aside>
@@ -271,21 +331,80 @@ const DeveloperNotebook = () => {
               </div>
             )}
             {folders.map((folder) => (
-              <button
-                key={folder.id}
-                onClick={() => dispatch(setActiveFolder(folder.id))}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-                  activeFolderId === folder.id
-                    ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-semibold"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
-                }`}
-              >
-                <Folder
-                  size={20}
-                  fill={activeFolderId === folder.id ? "currentColor" : "none"}
-                />
-                <span className="text-sm">{folder.name}</span>
-              </button>
+              <div key={folder.id} className="group relative">
+                {editingId === folder.id ? (
+                  <input
+                    autoFocus
+                    className="w-full bg-white dark:bg-slate-800 border border-blue-500 rounded-xl p-3 text-sm outline-none"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => setEditingId(null)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        dispatch(
+                          renameFolder({ id: folder.id, name: editValue }),
+                        );
+                        setEditingId(null);
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => dispatch(setActiveFolder(folder.id))}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                        activeFolderId === folder.id
+                          ? "bg-blue-50 dark:bg-blue-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
+                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+                      }`}
+                    >
+                      <Folder
+                        size={20}
+                        fill={
+                          activeFolderId === folder.id ? "currentColor" : "none"
+                        }
+                      />
+                      <span className="text-sm font-medium block truncate">
+                        {folder.name}
+                      </span>
+                    </button>
+
+                    {/* Actions appear on hover */}
+                    <div className="absolute right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm p-1 rounded-lg">
+                      <button
+                        onClick={() => {
+                          setEditingId(folder.id);
+                          setEditValue(folder.name);
+                        }}
+                        className="p-1 hover:text-blue-500 text-slate-400"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                      <button
+                        onClick={() => dispatch(deleteFolder(folder.id))}
+                        className="p-1 hover:text-red-500 text-slate-400"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              // <button
+              //   key={folder.id}
+              //   onClick={() => dispatch(setActiveFolder(folder.id))}
+              //   className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+              //     activeFolderId === folder.id
+              //       ? "bg-blue-50 dark:bg-blue-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
+              //       : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+              //   }`}
+              // >
+              //   <Folder
+              //     size={20}
+              //     fill={activeFolderId === folder.id ? "currentColor" : "none"}
+              //   />
+              //   <span className="text-sm">{folder.name}</span>
+              // </button>
             ))}
           </div>
         </aside>

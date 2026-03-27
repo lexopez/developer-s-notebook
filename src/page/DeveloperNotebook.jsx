@@ -110,7 +110,7 @@ const DeveloperNotebook = () => {
 
       <div className="w-full h-full flex gap-4">
         {/* LEFT BOX: Notes List (15%) */}
-        <aside className="w-[15%] h-full flex flex-col pr-2">
+        <aside className="w-[15%] h-full flex flex-col">
           <div className="flex items-center justify-between mb-4 px-2">
             <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
               {folders.find((f) => f.id === activeFolderId)?.name || "Notes"}
@@ -314,7 +314,7 @@ const DeveloperNotebook = () => {
         </main>
 
         {/* RIGHT BOX: Folders (15%) */}
-        <aside className="w-[15%] h-full overflow-y-auto pl-2">
+        <aside className="w-[15%] h-full flex flex-col">
           <div className="flex items-center justify-between mb-4 px-2">
             <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
               Folders
@@ -329,7 +329,7 @@ const DeveloperNotebook = () => {
               {isAddingFolder ? <X size={20} /> : <Plus size={20} />}
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto space-y-1">
+          <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 h-full">
             {isAddingFolder && (
               <div className="p-2 mb-2">
                 <input
@@ -393,41 +393,59 @@ const DeveloperNotebook = () => {
                     </button>
 
                     {/* Actions appear on hover */}
-                    <div className="absolute right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm p-1 rounded-lg">
-                      <button
-                        onClick={() => {
-                          setEditingId(folder.id);
-                          setEditValue(folder.name);
-                        }}
-                        className="p-1 hover:text-blue-500 text-slate-400"
-                      >
-                        <Edit3 size={14} />
-                      </button>
-                      <button
-                        onClick={() => dispatch(deleteFolder(folder.id))}
-                        className="p-1 hover:text-red-500 text-slate-400"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenMenu(e, folder.id);
+                      }}
+                      className="absolute right-2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                    >
+                      <MoreVertical size={16} />
+                    </button>
+                    {/* The Dropdown Menu */}
+                    {menuConfig.id && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-60"
+                          onClick={() =>
+                            setMenuConfig({ id: null, x: 0, y: 0 })
+                          }
+                        />
+                        <div
+                          style={{
+                            top: `${menuConfig.y}px`,
+                            left: `${menuConfig.x}px`,
+                          }}
+                          className="fixed w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl z-70 py-1 animate-in fade-in zoom-in-95 duration-100"
+                        >
+                          <button
+                            onClick={() => {
+                              setEditingId(menuConfig.id);
+                              const folder = folders.find(
+                                (n) => n.id === menuConfig.id,
+                              );
+                              setEditValue(folder?.name || "");
+                              setMenuConfig({ id: null, x: 0, y: 0 });
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
+                          >
+                            <Edit3 size={14} /> Rename
+                          </button>
+                          <button
+                            onClick={() => {
+                              dispatch(deleteFolder(menuConfig.id));
+                              setMenuConfig({ id: null, x: 0, y: 0 });
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer"
+                          >
+                            <Trash2 size={14} /> Delete
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
-              // <button
-              //   key={folder.id}
-              //   onClick={() => dispatch(setActiveFolder(folder.id))}
-              //   className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-              //     activeFolderId === folder.id
-              //       ? "bg-blue-50 dark:bg-blue-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
-              //       : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
-              //   }`}
-              // >
-              //   <Folder
-              //     size={20}
-              //     fill={activeFolderId === folder.id ? "currentColor" : "none"}
-              //   />
-              //   <span className="text-sm">{folder.name}</span>
-              // </button>
             ))}
           </div>
         </aside>

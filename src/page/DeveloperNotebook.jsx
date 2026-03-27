@@ -15,6 +15,7 @@ import {
   Check,
   Trash2,
   Edit3,
+  MoreVertical,
 } from "lucide-react";
 import {
   setActiveFolder,
@@ -47,6 +48,8 @@ const DeveloperNotebook = () => {
 
   const [isAddingFolder, setIsAddingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
+
+  const [menuConfig, setMenuConfig] = useState({ id: null, x: 0, y: 0 });
 
   // Sync theme with the DOM
   useEffect(() => {
@@ -82,6 +85,13 @@ const DeveloperNotebook = () => {
 
   const contentToDisplay = getActiveContent();
 
+  const handleOpenMenu = (e, id) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    // Position the menu to the left of the button to keep it inside the sidebar area
+    setMenuConfig({ id, x: rect.left - 130, y: rect.top });
+  };
+
   return (
     <div className="h-screen w-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden px-[10vw] py-[10vh]">
       {/* Theme Toggle Button - Top Right */}
@@ -100,7 +110,7 @@ const DeveloperNotebook = () => {
 
       <div className="w-full h-full flex gap-4">
         {/* LEFT BOX: Notes List (15%) */}
-        <aside className="w-[15%] h-full overflow-y-auto pr-2">
+        <aside className="w-[15%] h-full flex flex-col pr-2">
           <div className="flex items-center justify-between mb-4 px-2">
             <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
               {folders.find((f) => f.id === activeFolderId)?.name || "Notes"}
@@ -115,7 +125,7 @@ const DeveloperNotebook = () => {
               {isAddingNote ? <X size={20} /> : <Plus size={20} />}
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto space-y-1">
+          <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 h-full">
             {isAddingNote && (
               <div className="p-2 mb-2 animate-in fade-in zoom-in-95 duration-200">
                 <input
@@ -170,47 +180,60 @@ const DeveloperNotebook = () => {
                         {note.title}
                       </span>
                     </button>
-
-                    {/* Actions appear on hover */}
-                    <div className="absolute right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-sm p-1 rounded-lg">
-                      <button
-                        onClick={() => {
-                          setEditingId(note.id);
-                          setEditValue(note.title);
-                        }}
-                        className="p-1 hover:text-blue-500 text-slate-400"
-                      >
-                        <Edit3 size={14} />
-                      </button>
-                      <button
-                        onClick={() => dispatch(deleteNote(note.id))}
-                        className="p-1 hover:text-red-500 text-slate-400"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
+                    {/* The Ellipsis Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenMenu(e, note.id);
+                      }}
+                      className="absolute right-2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                    >
+                      <MoreVertical size={16} />
+                    </button>
+                    {/* The Dropdown Menu */}
+                    {menuConfig.id && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-60"
+                          onClick={() =>
+                            setMenuConfig({ id: null, x: 0, y: 0 })
+                          }
+                        />
+                        <div
+                          style={{
+                            top: `${menuConfig.y}px`,
+                            left: `${menuConfig.x}px`,
+                          }}
+                          className="fixed w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl z-70 py-1 animate-in fade-in zoom-in-95 duration-100"
+                        >
+                          <button
+                            onClick={() => {
+                              setEditingId(menuConfig.id);
+                              const note = sidebarNotes.find(
+                                (n) => n.id === menuConfig.id,
+                              );
+                              setEditValue(note?.title || "");
+                              setMenuConfig({ id: null, x: 0, y: 0 });
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
+                          >
+                            <Edit3 size={14} /> Rename
+                          </button>
+                          <button
+                            onClick={() => {
+                              dispatch(deleteNote(menuConfig.id));
+                              setMenuConfig({ id: null, x: 0, y: 0 });
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer"
+                          >
+                            <Trash2 size={14} /> Delete
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
-              // <button
-              //   key={note.id}
-              //   onClick={() => dispatch(setActiveNote(note.id))}
-              //   className={`w-full text-left p-3 rounded-xl border transition-all ${
-              //     activeNoteId === note.id
-              //       ? "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm"
-              //       : "border-transparent hover:bg-slate-200/50 dark:hover:bg-slate-800/30"
-              //   }`}
-              // >
-              //   <span
-              //     className={`text-sm font-medium block truncate ${
-              //       activeNoteId === note.id
-              //         ? "text-blue-600 dark:text-blue-400"
-              //         : "text-slate-700 dark:text-slate-300"
-              //     }`}
-              //   >
-              //     {note.title}
-              //   </span>
-              // </button>
             ))}
           </div>
         </aside>

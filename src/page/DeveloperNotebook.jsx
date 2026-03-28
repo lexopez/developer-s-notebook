@@ -12,7 +12,6 @@ import {
   Sun,
   Plus,
   X,
-  Check,
   Trash2,
   Edit3,
   MoreVertical,
@@ -29,6 +28,7 @@ import {
   deleteNote,
   renameNote,
 } from "../store/notesSlice";
+import { SmartNoteCreator } from "../components/SmartNoteCreator";
 
 const DeveloperNotebook = () => {
   const dispatch = useDispatch();
@@ -49,9 +49,24 @@ const DeveloperNotebook = () => {
   const [isAddingFolder, setIsAddingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
 
-  const [menuConfig, setMenuConfig] = useState({ id: null, x: 0, y: 0 });
+  const [menuConfig, setMenuConfig] = useState({
+    id: null,
+    x: 0,
+    y: 0,
+    type: null,
+  });
 
-  // Sync theme with the DOM
+  // const [quickAdd, setQuickAdd] = useState({
+  //   folderName: "",
+  //   noteTitle: "",
+  //   category: activeCategory === "all" ? "notes" : activeCategory,
+  //   content: "", // For general notes
+  //   code: "", // For snippets
+  //   label: "", // For snippet label
+  //   projectName: "",
+  //   projectUrl: "",
+  // });
+
   useEffect(() => {
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
@@ -68,16 +83,12 @@ const DeveloperNotebook = () => {
     { id: "notes", label: "Just Notes", icon: <StickyNote size={16} /> },
   ];
 
-  // Logic to find what to show
-  // ADD THIS: Sidebar only cares about the folder
   const sidebarNotes = notes.filter((n) => n.folderId === activeFolderId);
   const currentNote = notes.find((n) => n.id === activeNoteId);
 
-  // Helper to get the specific list to display in the main box
   const getActiveContent = () => {
     if (!currentNote) return [];
     if (activeCategory === "all") {
-      // Combine all categories into one list for "All" view
       return Object.values(currentNote.data).flat();
     }
     return currentNote.data[activeCategory] || [];
@@ -85,20 +96,25 @@ const DeveloperNotebook = () => {
 
   const contentToDisplay = getActiveContent();
 
-  const handleOpenMenu = (e, id) => {
+  // Dynamic Positioning Logic
+  const handleOpenMenu = (e, id, type) => {
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
-    // Position the menu to the left of the button to keep it inside the sidebar area
-    setMenuConfig({ id, x: rect.left - 130, y: rect.top });
+    const isRightSidebar = type === "folder";
+
+    // If it's the right sidebar, push the menu to the left of the button
+    // If it's the left sidebar, also push it to the left so it stays inside the 15% width
+    const xPos = isRightSidebar ? rect.left - 130 : rect.left - 130;
+
+    setMenuConfig({ id, x: xPos, y: rect.top, type });
   };
 
   return (
     <div className="h-screen w-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden px-[10vw] py-[10vh]">
-      {/* Theme Toggle Button - Top Right */}
       <div className="absolute top-6 right-8">
         <button
           onClick={() => dispatch(toggleTheme())}
-          className="p-2 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 hover:scale-110 transition-transform"
+          className="p-2 rounded-full bg-white dark:bg-slate-800 shadow-md border border-slate-200 dark:border-slate-700 hover:scale-110 transition-transform cursor-pointer"
         >
           {theme === "light" ? (
             <Moon size={20} className="text-slate-600" />
@@ -109,162 +125,116 @@ const DeveloperNotebook = () => {
       </div>
 
       <div className="w-full h-full flex gap-4">
-        {/* LEFT BOX: Notes List (15%) */}
+        {/* LEFT SIDEBAR: NOTES */}
         <aside className="w-[15%] h-full flex flex-col">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              {folders.find((f) => f.id === activeFolderId)?.name || "Notes"}
-            </h3>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsAddingNote(true);
-              }}
-              className="text-slate-400 hover:text-cyan-500 transition-colors cursor-pointer"
-            >
-              {isAddingNote ? <X size={20} /> : <Plus size={20} />}
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 h-full">
-            {isAddingNote && (
-              <div className="p-2 mb-2 animate-in fade-in zoom-in-95 duration-200">
-                <input
-                  autoFocus
-                  maxLength={40}
-                  className="w-full bg-slate-200 text-slate-600 dark:text-slate-200 dark:bg-slate-800/50 rounded-lg p-2 text-sm outline-none border-b-2 border-cyan-500 "
-                  placeholder="Note title..."
-                  value={newNoteTitle}
-                  onChange={(e) => setNewNoteTitle(e.target.value)}
-                  onBlur={(e) => {
-                    e.stopPropagation();
-                    setIsAddingNote(false);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      if (
-                        !newNoteTitle.trim() ||
-                        newNoteTitle.length > 40 ||
-                        !activeFolderId
-                      )
-                        return;
-                      dispatch(addNote(newNoteTitle));
-                      setIsAddingNote(false);
-                      setNewNoteTitle("");
-                    }
-                  }}
-                />
-                {newNoteTitle.length >= 30 && (
-                  <p className="text-[9px] text-orange-500 mt-1 px-1">
-                    {40 - newNoteTitle.length} characters remaining
-                  </p>
-                )}
+          {sidebarNotes.length !== 0 && (
+            <>
+              <div className="flex items-center justify-between mb-4 px-2">
+                <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest truncate">
+                  {folders.find((f) => f.id === activeFolderId)?.name ||
+                    "Notes"}
+                </h3>
+                <button
+                  onClick={() => setIsAddingNote(true)}
+                  className="text-slate-400 hover:text-cyan-500 transition-colors cursor-pointer"
+                >
+                  {isAddingNote ? <X size={20} /> : <Plus size={20} />}
+                </button>
               </div>
-            )}
 
-            {sidebarNotes.map((note) => (
-              <div key={note.id} className="group relative">
-                {editingId === note.id ? (
-                  <>
+              <div className="flex-1 overflow-y-auto no-scrollbar space-y-1">
+                {isAddingNote && (
+                  <div className="p-2 mb-2 animate-in fade-in zoom-in-95 duration-200">
                     <input
                       autoFocus
-                      maxLength={40}
-                      className="w-full bg-white dark:text-slate-200 dark:bg-slate-800 border border-cyan-500 rounded-xl p-3 text-sm outline-none"
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      onBlur={() => setEditingId(null)}
+                      maxLength={50}
+                      className="w-full bg-slate-200 dark:bg-slate-800/50 text-slate-900 dark:text-slate-200 rounded-lg p-2 text-sm outline-none border-b-2 border-cyan-500"
+                      placeholder="Note title..."
+                      value={newNoteTitle}
+                      onChange={(e) => setNewNoteTitle(e.target.value)}
+                      onBlur={() => setIsAddingNote(false)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          if (!editValue.trim() || editValue.length > 40)
-                            return;
-                          dispatch(
-                            renameNote({ id: note.id, name: editValue }),
-                          );
-                          setEditingId(null);
+                        if (
+                          e.key === "Enter" &&
+                          newNoteTitle.trim() &&
+                          activeFolderId &&
+                          newNoteTitle.length <= 50
+                        ) {
+                          dispatch(addNote(newNoteTitle));
+                          setIsAddingNote(false);
+                          setNewNoteTitle("");
                         }
                       }}
                     />
-                    {editValue.length >= 30 && (
+                    {newNoteTitle.length >= 40 && (
                       <p className="text-[9px] text-orange-500 mt-1 px-1">
-                        {40 - editValue.length} characters remaining
+                        {50 - newNoteTitle.length} characters remaining
                       </p>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => dispatch(setActiveNote(note.id))}
-                      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-                        activeNoteId === note.id
-                          ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
-                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
-                      }`}
-                    >
-                      <FileText size={20} />
-                      <span className="text-sm font-medium block truncate">
-                        {note.title}
-                      </span>
-                    </button>
-                    {/* The Ellipsis Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenMenu(e, note.id);
-                      }}
-                      className="absolute right-2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                    >
-                      <MoreVertical size={16} />
-                    </button>
-                    {/* The Dropdown Menu */}
-                    {menuConfig.id && menuConfig.id === note.id && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-60"
-                          onClick={() =>
-                            setMenuConfig({ id: null, x: 0, y: 0 })
-                          }
-                        />
-
-                        <div
-                          style={{
-                            top: `${menuConfig.y}px`,
-                            left: `${menuConfig.x}px`,
-                          }}
-                          className="fixed w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl z-70 py-1 animate-in fade-in zoom-in-95 duration-100"
-                        >
-                          <button
-                            onClick={() => {
-                              console.log("test");
-                              setEditingId(menuConfig.id);
-                              const note = sidebarNotes.find(
-                                (n) => n.id === menuConfig.id,
-                              );
-                              setEditValue(note?.title || "");
-                              setMenuConfig({ id: null, x: 0, y: 0 });
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
-                          >
-                            <Edit3 size={14} /> Rename
-                          </button>
-                          <button
-                            onClick={() => {
-                              dispatch(deleteNote(menuConfig.id));
-                              setMenuConfig({ id: null, x: 0, y: 0 });
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer"
-                          >
-                            <Trash2 size={14} /> Delete
-                          </button>
-                        </div>
-                      </>
                     )}
                   </div>
                 )}
+
+                {sidebarNotes.map((note) => (
+                  <div key={note.id} className="group relative">
+                    {editingId === note.id ? (
+                      <>
+                        <input
+                          autoFocus
+                          maxLength={50}
+                          className="w-full bg-white dark:bg-slate-800 dark:text-slate-200 border border-cyan-500 rounded-xl p-3 text-sm outline-none"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={() => setEditingId(null)}
+                          onKeyDown={(e) => {
+                            if (
+                              e.key === "Enter" &&
+                              editValue.trim() &&
+                              editValue.length <= 50
+                            ) {
+                              dispatch(
+                                renameNote({ id: note.id, name: editValue }),
+                              );
+                              setEditingId(null);
+                            }
+                          }}
+                        />
+                        {editValue.length >= 40 && (
+                          <p className="text-[9px] text-orange-500 mt-1 px-1">
+                            {50 - editValue.length} characters remaining
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => dispatch(setActiveNote(note.id))}
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                            activeNoteId === note.id
+                              ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 font-semibold shadow-sm"
+                              : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+                          }`}
+                        >
+                          <FileText size={20} className="shrink-0" />
+                          <span className="text-sm font-medium block truncate pr-4">
+                            {note.title}
+                          </span>
+                        </button>
+                        <button
+                          onClick={(e) => handleOpenMenu(e, note.id, "note")}
+                          className="absolute right-2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </aside>
 
-        {/* MAIN BOX: Editor (70%) */}
+        {/* MAIN EDITOR */}
         <main className="w-[70%] h-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col overflow-hidden">
           <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
             <div className="flex gap-2 p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl overflow-x-auto no-scrollbar">
@@ -272,14 +242,13 @@ const DeveloperNotebook = () => {
                 <button
                   key={cat.id}
                   onClick={() => dispatch(setCategory(cat.id))}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
                     activeCategory === cat.id
                       ? "bg-white dark:bg-slate-700 text-cyan-600 dark:text-cyan-400 shadow-sm"
                       : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                   }`}
                 >
-                  {cat.icon}
-                  {cat.label}
+                  {cat.icon} {cat.label}
                 </button>
               ))}
             </div>
@@ -297,7 +266,6 @@ const DeveloperNotebook = () => {
                       key={item.id}
                       className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800"
                     >
-                      {/* Render Code Snippets */}
                       {item.code && (
                         <div>
                           <span className="text-[10px] font-bold text-cyan-500 uppercase mb-2 block">
@@ -308,8 +276,6 @@ const DeveloperNotebook = () => {
                           </pre>
                         </div>
                       )}
-
-                      {/* Render Projects */}
                       {item.status && (
                         <div className="flex justify-between items-center">
                           <span className="font-semibold text-slate-700 dark:text-slate-200">
@@ -320,8 +286,6 @@ const DeveloperNotebook = () => {
                           </span>
                         </div>
                       )}
-
-                      {/* Render General Notes */}
                       {item.text && (
                         <p className="text-slate-600 dark:text-slate-400 leading-relaxed italic border-l-4 border-cyan-500 pl-4">
                           "{item.text}"
@@ -332,167 +296,175 @@ const DeveloperNotebook = () => {
                 </div>
               </div>
             ) : (
-              <div className="h-full flex items-center justify-center text-slate-400">
-                <p>Select a note to view content</p>
+              <div className="h-full flex flex-col items-center justify-center">
+                <SmartNoteCreator
+                  activeCategory={activeCategory}
+                  folders={folders}
+                  dispatch={dispatch}
+                />
               </div>
             )}
           </section>
         </main>
 
-        {/* RIGHT BOX: Folders (15%) */}
+        {/* RIGHT SIDEBAR: FOLDERS */}
         <aside className="w-[15%] h-full flex flex-col">
-          <div className="flex items-center justify-between mb-4 px-2">
-            <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              Folders
-            </h3>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsAddingFolder(true);
-              }}
-              className="text-slate-400 hover:text-cyan-500 transition-colors cursor-pointer"
-            >
-              {isAddingFolder ? <X size={20} /> : <Plus size={20} />}
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 h-full">
-            {isAddingFolder && (
-              <div className="p-2 mb-2">
-                <input
-                  autoFocus
-                  maxLength={40}
-                  className="w-full bg-slate-200 text-slate-600 dark:text-slate-200 dark:bg-slate-800 rounded-lg p-2 text-sm outline-none border-b-2 border-cyan-500 "
-                  placeholder="Folder name..."
-                  value={newFolderName}
-                  onChange={(e) => setNewFolderName(e.target.value)}
-                  onBlur={(e) => {
-                    e.stopPropagation();
-                    setIsAddingFolder(false);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      if (!newFolderName.trim() || newFolderName.length > 40)
-                        return;
-                      dispatch(addFolder(newFolderName));
-                      setIsAddingFolder(false);
-                      setNewFolderName("");
-                    }
-                  }}
-                />
-                {newFolderName.length >= 30 && (
-                  <p className="text-[9px] text-orange-500 mt-1 px-1">
-                    {40 - newFolderName.length} characters remaining
-                  </p>
-                )}
+          {folders.length !== 0 && (
+            <>
+              <div className="flex items-center justify-between mb-4 px-2">
+                <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                  Folders
+                </h3>
+                <button
+                  onClick={() => setIsAddingFolder(true)}
+                  className="text-slate-400 hover:text-cyan-500 transition-colors cursor-pointer"
+                >
+                  {isAddingFolder ? <X size={20} /> : <Plus size={20} />}
+                </button>
               </div>
-            )}
-            {folders.map((folder) => (
-              <div key={folder.id} className="group relative">
-                {editingId === folder.id ? (
-                  <>
+              <div className="flex-1 overflow-y-auto no-scrollbar space-y-1">
+                {isAddingFolder && (
+                  <div className="p-2 mb-2 animate-in fade-in zoom-in-95 duration-200">
                     <input
                       autoFocus
-                      maxLength={40}
-                      className="w-full bg-white dark:text-slate-200 dark:bg-slate-800 border border-cyan-500 rounded-xl p-3 text-sm outline-none"
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      onBlur={() => setEditingId(null)}
+                      maxLength={50}
+                      className="w-full bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-200 rounded-lg p-2 text-sm outline-none border-b-2 border-cyan-500"
+                      placeholder="Folder name..."
+                      value={newFolderName}
+                      onChange={(e) => setNewFolderName(e.target.value)}
+                      onBlur={() => setIsAddingFolder(false)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          if (!editValue.trim() || editValue.length > 40)
-                            return;
-                          dispatch(
-                            renameFolder({ id: folder.id, name: editValue }),
-                          );
-                          setEditingId(null);
+                        if (
+                          e.key === "Enter" &&
+                          newFolderName.trim() &&
+                          newFolderName.length <= 50
+                        ) {
+                          dispatch(addFolder(newFolderName));
+                          setIsAddingFolder(false);
+                          setNewFolderName("");
                         }
                       }}
                     />
-                    {editValue.length >= 30 && (
+                    {newFolderName.length >= 40 && (
                       <p className="text-[9px] text-orange-500 mt-1 px-1">
-                        {40 - editValue.length} characters remaining
+                        {50 - newFolderName.length} characters remaining
                       </p>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => dispatch(setActiveFolder(folder.id))}
-                      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
-                        activeFolderId === folder.id
-                          ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
-                          : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
-                      }`}
-                    >
-                      <Folder
-                        size={20}
-                        fill={
-                          activeFolderId === folder.id ? "currentColor" : "none"
-                        }
-                      />
-                      <span className="text-sm font-medium block truncate">
-                        {folder.name}
-                      </span>
-                    </button>
-
-                    {/* Actions appear on hover */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenMenu(e, folder.id);
-                      }}
-                      className="absolute right-2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                    >
-                      <MoreVertical size={16} />
-                    </button>
-                    {/* The Dropdown Menu */}
-                    {menuConfig.id && menuConfig.id === folder.id && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-60"
-                          onClick={() =>
-                            setMenuConfig({ id: null, x: 0, y: 0 })
-                          }
-                        />
-                        <div
-                          style={{
-                            top: `${menuConfig.y}px`,
-                            left: `${menuConfig.x}px`,
-                          }}
-                          className="fixed w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl z-70 py-1 animate-in fade-in zoom-in-95 duration-100"
-                        >
-                          <button
-                            onClick={() => {
-                              setEditingId(menuConfig.id);
-                              const folder = folders.find(
-                                (n) => n.id === menuConfig.id,
-                              );
-                              setEditValue(folder?.name || "");
-                              setMenuConfig({ id: null, x: 0, y: 0 });
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg cursor-pointer"
-                          >
-                            <Edit3 size={14} /> Rename
-                          </button>
-                          <button
-                            onClick={() => {
-                              dispatch(deleteFolder(menuConfig.id));
-                              setMenuConfig({ id: null, x: 0, y: 0 });
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg cursor-pointer"
-                          >
-                            <Trash2 size={14} /> Delete
-                          </button>
-                        </div>
-                      </>
                     )}
                   </div>
                 )}
+                {folders.map((folder) => (
+                  <div key={folder.id} className="group relative">
+                    {editingId === folder.id ? (
+                      <>
+                        <input
+                          autoFocus
+                          maxLength={50}
+                          className="w-full bg-white dark:bg-slate-800 dark:text-slate-200 border border-cyan-500 rounded-xl p-3 text-sm outline-none"
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onBlur={() => setEditingId(null)}
+                          onKeyDown={(e) => {
+                            if (
+                              e.key === "Enter" &&
+                              editValue.trim() &&
+                              editValue.length <= 50
+                            ) {
+                              dispatch(
+                                renameFolder({
+                                  id: folder.id,
+                                  name: editValue,
+                                }),
+                              );
+                              setEditingId(null);
+                            }
+                          }}
+                        />
+                        {editValue.length >= 40 && (
+                          <p className="text-[9px] text-orange-500 mt-1 px-1">
+                            {50 - editValue.length} characters remaining
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => dispatch(setActiveFolder(folder.id))}
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                            activeFolderId === folder.id
+                              ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 font-semibold shadow-sm"
+                              : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
+                          }`}
+                        >
+                          <Folder
+                            size={20}
+                            fill={
+                              activeFolderId === folder.id
+                                ? "currentColor"
+                                : "none"
+                            }
+                            className="shrink-0"
+                          />
+                          <span className="text-sm font-medium block truncate pr-4">
+                            {folder.name}
+                          </span>
+                        </button>
+                        <button
+                          onClick={(e) =>
+                            handleOpenMenu(e, folder.id, "folder")
+                          }
+                          className="absolute right-2 p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </aside>
       </div>
+
+      {/* THE GLOBAL SMART MENU */}
+      {menuConfig.id && (
+        <>
+          <div
+            className="fixed inset-0 z-[60]"
+            onClick={() => setMenuConfig({ id: null, x: 0, y: 0, type: null })}
+          />
+          <div
+            style={{ top: `${menuConfig.y}px`, left: `${menuConfig.x}px` }}
+            className="fixed w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-[70] py-1 animate-in fade-in zoom-in-95 duration-100 overflow-hidden"
+          >
+            <button
+              onClick={() => {
+                setEditingId(menuConfig.id);
+                const target =
+                  menuConfig.type === "note"
+                    ? notes.find((n) => n.id === menuConfig.id)
+                    : folders.find((f) => f.id === menuConfig.id);
+                setEditValue(target?.title || target?.name || "");
+                setMenuConfig({ id: null, x: 0, y: 0, type: null });
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer"
+            >
+              <Edit3 size={14} /> Rename
+            </button>
+            <button
+              onClick={() => {
+                menuConfig.type === "note"
+                  ? dispatch(deleteNote(menuConfig.id))
+                  : dispatch(deleteFolder(menuConfig.id));
+                setMenuConfig({ id: null, x: 0, y: 0, type: null });
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer"
+            >
+              <Trash2 size={14} /> Delete
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

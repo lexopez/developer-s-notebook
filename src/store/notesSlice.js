@@ -3,103 +3,103 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   folders: [
-    { id: "f1", name: "Frontend Tips" },
-    { id: "f2", name: "Backend Docs" },
+    // { id: "f1", name: "Frontend Tips" },
+    // { id: "f2", name: "Backend Docs" },
   ],
   notes: [
-    {
-      id: "n1",
-      folderId: "f1",
-      title: "React js",
-      data: {
-        "code snippets": [
-          {
-            id: "c1",
-            label: "Counter Hook",
-            code: "const [count, setCount] = useState(0);",
-          },
-          {
-            id: "c2",
-            label: "useEffect Cleanup",
-            code: "return () => clearInterval(timer);",
-          },
-        ],
-        "side projects": [
-          {
-            id: "p1",
-            name: "Weather Dashboard",
-            url: "https://weather-dashboard.com",
-          },
-        ],
-        resources: [
-          { id: "r1", name: "Beta React Docs", url: "https://react.dev" },
-        ],
-        notes: [{ id: "g1", text: "Remember that props are read-only." }],
-      },
-    },
-    {
-      id: "n2",
-      folderId: "f1",
-      title: "Tailwind Config",
-      data: {
-        "code snippets": [
-          {
-            id: "c1",
-            label: "Counter Hook",
-            code: "const [count, setCount] = useState(0);",
-          },
-          {
-            id: "c2",
-            label: "useEffect Cleanup",
-            code: "return () => clearInterval(timer);",
-          },
-        ],
-        "side projects": [
-          {
-            id: "p1",
-            name: "Weather Dashboard",
-            url: "https://weather-dashboard.com",
-          },
-        ],
-        resources: [
-          { id: "r1", name: "Beta React Docs", url: "https://react.dev" },
-        ],
-        notes: [{ id: "g1", text: "Remember that props are read-only." }],
-      },
-    },
-    {
-      id: "n3",
-      folderId: "f2",
-      title: "Node 25 Features",
-      data: {
-        "code snippets": [
-          {
-            id: "c1",
-            label: "Counter Hook",
-            code: "const [count, setCount] = useState(0);",
-          },
-          {
-            id: "c2",
-            label: "useEffect Cleanup",
-            code: "return () => clearInterval(timer);",
-          },
-        ],
-        "side projects": [
-          {
-            id: "p1",
-            name: "Weather Dashboard",
-            url: "https://weather-dashboard.com",
-          },
-        ],
-        resources: [{ id: "r1", name: "Beta React Docs", url: "react.dev" }],
-        notes: [{ id: "g1", text: "Remember that props are read-only." }],
-      },
-    },
+    // {
+    //   id: "n1",
+    //   folderId: "f1",
+    //   title: "React js",
+    //   data: {
+    //     "code snippets": [
+    //       {
+    //         id: "c1",
+    //         label: "Counter Hook",
+    //         code: "const [count, setCount] = useState(0);",
+    //       },
+    //       {
+    //         id: "c2",
+    //         label: "useEffect Cleanup",
+    //         code: "return () => clearInterval(timer);",
+    //       },
+    //     ],
+    //     "side projects": [
+    //       {
+    //         id: "p1",
+    //         name: "Weather Dashboard",
+    //         url: "https://weather-dashboard.com",
+    //       },
+    //     ],
+    //     resources: [
+    //       { id: "r1", name: "Beta React Docs", url: "https://react.dev" },
+    //     ],
+    //     notes: [{ id: "g1", text: "Remember that props are read-only." }],
+    //   },
+    // },
+    // {
+    //   id: "n2",
+    //   folderId: "f1",
+    //   title: "Tailwind Config",
+    //   data: {
+    //     "code snippets": [
+    //       {
+    //         id: "c1",
+    //         label: "Counter Hook",
+    //         code: "const [count, setCount] = useState(0);",
+    //       },
+    //       {
+    //         id: "c2",
+    //         label: "useEffect Cleanup",
+    //         code: "return () => clearInterval(timer);",
+    //       },
+    //     ],
+    //     "side projects": [
+    //       {
+    //         id: "p1",
+    //         name: "Weather Dashboard",
+    //         url: "https://weather-dashboard.com",
+    //       },
+    //     ],
+    //     resources: [
+    //       { id: "r1", name: "Beta React Docs", url: "https://react.dev" },
+    //     ],
+    //     notes: [{ id: "g1", text: "Remember that props are read-only." }],
+    //   },
+    // },
+    // {
+    //   id: "n3",
+    //   folderId: "f2",
+    //   title: "Node 25 Features",
+    //   data: {
+    //     "code snippets": [
+    //       {
+    //         id: "c1",
+    //         label: "Counter Hook",
+    //         code: "const [count, setCount] = useState(0);",
+    //       },
+    //       {
+    //         id: "c2",
+    //         label: "useEffect Cleanup",
+    //         code: "return () => clearInterval(timer);",
+    //       },
+    //     ],
+    //     "side projects": [
+    //       {
+    //         id: "p1",
+    //         name: "Weather Dashboard",
+    //         url: "https://weather-dashboard.com",
+    //       },
+    //     ],
+    //     resources: [{ id: "r1", name: "Beta React Docs", url: "react.dev" }],
+    //     notes: [{ id: "g1", text: "Remember that props are read-only." }],
+    //   },
+    // },
   ],
-  activeFolderId: "f1",
+  // activeFolderId: "f1",
   activeCategory: "all",
-  activeNoteId: "n1", // Track the selected note
-  theme: "light",
+  // activeNoteId: "n1", // Track the selected note
+  theme: "dark",
 };
 
 const notesSlice = createSlice({
@@ -122,9 +122,10 @@ const notesSlice = createSlice({
       state.theme = state.theme === "light" ? "dark" : "light";
     },
     addFolder: (state, action) => {
+      console.log("Creating folder:", action.payload.name);
       const newFolder = {
-        id: Date.now().toString(), // Temporary ID until Supabase
-        name: action.payload,
+        id: action.payload.id || Date.now().toString(), // Temporary ID until Supabase
+        name: action.payload.name,
       };
       state.folders.push(newFolder);
       state.activeFolderId = newFolder.id;
@@ -132,9 +133,9 @@ const notesSlice = createSlice({
     },
     addNote: (state, action) => {
       const newNote = {
-        id: Date.now().toString(),
+        id: action.payload.id || Date.now().toString(), // Allow passing ID or generate one
         folderId: state.activeFolderId,
-        title: action.payload,
+        title: action.payload.title,
         data: {
           "code snippets": [],
           "side projects": [],
@@ -166,27 +167,45 @@ const notesSlice = createSlice({
       if (note) note.title = action.payload.name;
     },
     addContentToNote: (state, action) => {
-      const { folderId, noteId, category, data } = action.payload;
+      const { data } = action.payload;
 
-      // 1. Find the folder
-      const folder = state.folders.find((f) => f.id === folderId);
-      if (!folder) return;
+      let folderId = state.activeFolderId;
 
-      // 2. Find the note within that folder
-      const note = folder.notes.find((n) => n.id === noteId);
-      if (!note) return;
-
-      // 3. Ensure the category array exists (e.g., note.data['code snippets'])
-      if (!note.data[category]) {
-        note.data[category] = [];
+      if (data.folderName) {
+        folderId = Date.now().toString();
+        const newFolder = {
+          id: folderId,
+          name: data.folderName,
+        };
+        state.folders.push(newFolder);
+        state.activeFolderId = newFolder.id;
       }
 
-      // 4. Push the new item (the code, link, or text)
-      note.data[category].push({
-        ...data,
-        id: Date.now(), // Unique ID for the item itself
-        createdAt: new Date().toISOString(),
-      });
+      const cat =
+        state.activeCategory === "all" ? "notes" : state.activeCategory;
+
+      if (!state.activeNoteId && data.noteTitle) {
+        const newNoteId = Date.now().toString();
+
+        state.notes.push({
+          id: newNoteId,
+          folderId,
+          title: data.noteTitle || "Untitled Note",
+          data: {
+            [cat]: [{ ...data, id: Date.now().toString() }],
+          },
+        });
+        state.activeNoteId = newNoteId;
+      } else if (state.activeNoteId) {
+        const note = state.notes.find((n) => n.id === state.activeNoteId);
+
+        note.data[cat] = note.data[cat] || [];
+
+        note.data[cat].push({
+          ...data,
+          id: Date.now(), // Unique ID for the item itself
+        });
+      }
     },
   },
 });

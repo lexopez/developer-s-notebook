@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { addFolder, addNote } from "../store/notesSlice";
-import { Plus } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { addContentToNote } from "../store/notesSlice";
 
 export const SmartNoteForm = ({
   activeCategory,
@@ -10,7 +9,6 @@ export const SmartNoteForm = ({
   onSuccess,
 }) => {
   const dispatch = useDispatch();
-  const { folders } = useSelector((state) => state.notes);
 
   // Local state for all possible fields
   const [formData, setFormData] = useState({
@@ -30,46 +28,33 @@ export const SmartNoteForm = ({
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
-    // 1. Logic: If no folder is selected, we must create one first
-    let folderId = activeFolderId;
-    if (!folderId && formData.folderName.trim()) {
-      // In a real app, you'd capture the ID from the dispatch or use a UUID
-      dispatch(addFolder(formData.folderName));
-    }
+    // Prepare the specific data object based on category
+    let itemData = {};
+    const cat = activeCategory === "all" ? "notes" : activeCategory;
 
-    // 2. Logic: If no note is selected, create the note
-    let noteId = activeNoteId;
-    if (!noteId && formData.noteTitle.trim()) {
-      dispatch(addNote(formData.noteTitle));
-    }
+    if (!activeFolderId && formData.folderName.trim())
+      itemData.folderName = formData.folderName;
+    if (!activeNoteId && formData.noteTitle.trim())
+      itemData.noteTitle = formData.noteTitle;
 
-    // 3. Logic: Add the actual content based on category
-    const payload = {
-      category: activeCategory === "all" ? "notes" : activeCategory, // Default to notes if on "All"
-      data: {},
-    };
-
-    if (activeCategory === "code snippets") {
-      payload.data = {
-        id: Date.now(),
-        label: formData.label,
-        code: formData.code,
-      };
-    } else if (
-      activeCategory === "side projects" ||
-      activeCategory === "resources"
-    ) {
-      payload.data = { id: Date.now(), name: formData.name, url: formData.url };
+    if (cat === "code snippets") {
+      itemData.label = formData.label;
+      itemData.code = formData.code;
+    } else if (cat === "side projects" || cat === "resources") {
+      itemData.name = formData.name;
+      itemData.url = formData.url;
     } else {
-      payload.data = { id: Date.now(), text: formData.text };
+      itemData.text = formData.text;
     }
 
-    console.log(payload, noteId, folderId);
+    // 4. Dispatch the final content
+    dispatch(
+      addContentToNote({
+        data: itemData,
+      }),
+    );
 
-    // Dispatch your save action (assuming you have an addContent action)
-    // dispatch(addContentToNote({ noteId: noteId, ...payload }));
-
-    if (onSuccess) onSuccess(); // Close modal if applicable
+    if (onSuccess) onSuccess();
   };
 
   return (
@@ -127,7 +112,7 @@ export const SmartNoteForm = ({
             <>
               <input
                 name="name"
-                placeholder="Display Name"
+                placeholder="Name..."
                 className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
                 onChange={handleChange}
               />
@@ -154,7 +139,7 @@ export const SmartNoteForm = ({
           type="submit"
           className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-2xl transition-all transform active:scale-[0.98] cursor-pointer"
         >
-          Save to Notebook
+          Create a Note
         </button>
       </form>
     </div>

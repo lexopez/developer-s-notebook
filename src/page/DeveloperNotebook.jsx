@@ -27,7 +27,6 @@ import {
   renameFolder,
   deleteNote,
   renameNote,
-  addContentToNote,
 } from "../store/notesSlice";
 import { SmartNoteCreator } from "../components/SmartNoteCreator";
 import { ContentItem } from "../components/ContentItem";
@@ -60,17 +59,6 @@ const DeveloperNotebook = () => {
     y: 0,
     type: null,
   });
-
-  // const [quickAdd, setQuickAdd] = useState({
-  //   folderName: "",
-  //   noteTitle: "",
-  //   category: activeCategory === "all" ? "notes" : activeCategory,
-  //   content: "", // For general notes
-  //   code: "", // For snippets
-  //   label: "", // For snippet label
-  //   projectName: "",
-  //   projectUrl: "",
-  // });
 
   useEffect(() => {
     if (theme === "dark") {
@@ -165,7 +153,12 @@ const DeveloperNotebook = () => {
                           activeFolderId &&
                           newNoteTitle.length <= 50
                         ) {
-                          dispatch(addNote(newNoteTitle));
+                          dispatch(
+                            addNote({
+                              id: Date.now().toString(),
+                              title: newNoteTitle,
+                            }),
+                          );
                           setIsAddingNote(false);
                           setNewNoteTitle("");
                         }
@@ -258,57 +251,6 @@ const DeveloperNotebook = () => {
               ))}
             </div>
           </nav>
-          {/* <section className="flex-1 p-10 overflow-y-auto no-scrollbar">
-            {currentNote ? (
-              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <h1 className="text-4xl font-extrabold text-slate-800 dark:text-slate-100 mb-6">
-                  {currentNote.title}
-                </h1>
-                <div className="grid gap-4">
-                  {contentToDisplay.map((item) => (
-                    <div
-                      key={item.id}
-                      className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800"
-                    >
-                      {item.code && (
-                        <div>
-                          <span className="text-[10px] font-bold text-cyan-500 uppercase mb-2 block">
-                            {item.label}
-                          </span>
-                          <pre className="text-sm font-mono text-slate-600 dark:text-slate-400">
-                            {item.code}
-                          </pre>
-                        </div>
-                      )}
-                      {item.status && (
-                        <div className="flex justify-between items-center">
-                          <span className="font-semibold text-slate-700 dark:text-slate-200">
-                            {item.name}
-                          </span>
-                          <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                            {item.status}
-                          </span>
-                        </div>
-                      )}
-                      {item.text && (
-                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed italic border-l-4 border-cyan-500 pl-4">
-                          "{item.text}"
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center">
-                <SmartNoteCreator
-                  activeCategory={activeCategory}
-                  folders={folders}
-                  dispatch={dispatch}
-                />
-              </div>
-            )}
-          </section> */}
 
           <section className="flex-1 p-10 overflow-y-auto no-scrollbar relative">
             {currentNote ? (
@@ -439,7 +381,12 @@ const DeveloperNotebook = () => {
                           newFolderName.trim() &&
                           newFolderName.length <= 50
                         ) {
-                          dispatch(addFolder(newFolderName));
+                          dispatch(
+                            addFolder({
+                              id: Date.now().toString(),
+                              name: newFolderName,
+                            }),
+                          );
                           setIsAddingFolder(false);
                           setNewFolderName("");
                         }

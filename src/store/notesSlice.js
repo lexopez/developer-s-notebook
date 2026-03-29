@@ -25,9 +25,15 @@ const initialState = {
           },
         ],
         "side projects": [
-          { id: "p1", name: "Weather Dashboard", status: "In Progress" },
+          {
+            id: "p1",
+            name: "Weather Dashboard",
+            url: "https://weather-dashboard.com",
+          },
         ],
-        resources: [{ id: "r1", title: "Beta React Docs", url: "react.dev" }],
+        resources: [
+          { id: "r1", name: "Beta React Docs", url: "https://react.dev" },
+        ],
         notes: [{ id: "g1", text: "Remember that props are read-only." }],
       },
     },
@@ -49,9 +55,15 @@ const initialState = {
           },
         ],
         "side projects": [
-          { id: "p1", name: "Weather Dashboard", status: "In Progress" },
+          {
+            id: "p1",
+            name: "Weather Dashboard",
+            url: "https://weather-dashboard.com",
+          },
         ],
-        resources: [{ id: "r1", title: "Beta React Docs", url: "react.dev" }],
+        resources: [
+          { id: "r1", name: "Beta React Docs", url: "https://react.dev" },
+        ],
         notes: [{ id: "g1", text: "Remember that props are read-only." }],
       },
     },
@@ -73,9 +85,13 @@ const initialState = {
           },
         ],
         "side projects": [
-          { id: "p1", name: "Weather Dashboard", status: "In Progress" },
+          {
+            id: "p1",
+            name: "Weather Dashboard",
+            url: "https://weather-dashboard.com",
+          },
         ],
-        resources: [{ id: "r1", title: "Beta React Docs", url: "react.dev" }],
+        resources: [{ id: "r1", name: "Beta React Docs", url: "react.dev" }],
         notes: [{ id: "g1", text: "Remember that props are read-only." }],
       },
     },
@@ -83,7 +99,7 @@ const initialState = {
   activeFolderId: "f1",
   activeCategory: "all",
   activeNoteId: "n1", // Track the selected note
-  theme: "dark",
+  theme: "light",
 };
 
 const notesSlice = createSlice({
@@ -112,6 +128,7 @@ const notesSlice = createSlice({
       };
       state.folders.push(newFolder);
       state.activeFolderId = newFolder.id;
+      state.activeNoteId = null;
     },
     addNote: (state, action) => {
       const newNote = {
@@ -131,7 +148,10 @@ const notesSlice = createSlice({
     deleteFolder: (state, action) => {
       state.folders = state.folders.filter((f) => f.id !== action.payload);
       state.notes = state.notes.filter((n) => n.folderId !== action.payload);
-      if (state.activeFolderId === action.payload) state.activeFolderId = null;
+      if (state.activeFolderId === action.payload) {
+        state.activeFolderId = null;
+        state.activeNoteId = null;
+      }
     },
     renameFolder: (state, action) => {
       const folder = state.folders.find((f) => f.id === action.payload.id);
@@ -144,6 +164,29 @@ const notesSlice = createSlice({
     renameNote: (state, action) => {
       const note = state.notes.find((n) => n.id === action.payload.id);
       if (note) note.title = action.payload.name;
+    },
+    addContentToNote: (state, action) => {
+      const { folderId, noteId, category, data } = action.payload;
+
+      // 1. Find the folder
+      const folder = state.folders.find((f) => f.id === folderId);
+      if (!folder) return;
+
+      // 2. Find the note within that folder
+      const note = folder.notes.find((n) => n.id === noteId);
+      if (!note) return;
+
+      // 3. Ensure the category array exists (e.g., note.data['code snippets'])
+      if (!note.data[category]) {
+        note.data[category] = [];
+      }
+
+      // 4. Push the new item (the code, link, or text)
+      note.data[category].push({
+        ...data,
+        id: Date.now(), // Unique ID for the item itself
+        createdAt: new Date().toISOString(),
+      });
     },
   },
 });
@@ -159,5 +202,6 @@ export const {
   renameFolder,
   deleteNote,
   renameNote,
+  addContentToNote,
 } = notesSlice.actions;
 export default notesSlice.reducer;

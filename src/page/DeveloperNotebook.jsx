@@ -27,8 +27,11 @@ import {
   renameFolder,
   deleteNote,
   renameNote,
+  addContentToNote,
 } from "../store/notesSlice";
 import { SmartNoteCreator } from "../components/SmartNoteCreator";
+import { ContentItem } from "../components/ContentItem";
+import { SmartNoteForm } from "../components/SmartNoteForm";
 
 const DeveloperNotebook = () => {
   const dispatch = useDispatch();
@@ -48,6 +51,8 @@ const DeveloperNotebook = () => {
 
   const [isAddingFolder, setIsAddingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [menuConfig, setMenuConfig] = useState({
     id: null,
@@ -253,8 +258,7 @@ const DeveloperNotebook = () => {
               ))}
             </div>
           </nav>
-
-          <section className="flex-1 p-10 overflow-y-auto no-scrollbar">
+          {/* <section className="flex-1 p-10 overflow-y-auto no-scrollbar">
             {currentNote ? (
               <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <h1 className="text-4xl font-extrabold text-slate-800 dark:text-slate-100 mb-6">
@@ -302,6 +306,102 @@ const DeveloperNotebook = () => {
                   folders={folders}
                   dispatch={dispatch}
                 />
+              </div>
+            )}
+          </section> */}
+
+          <section className="flex-1 p-10 overflow-y-auto no-scrollbar relative">
+            {currentNote ? (
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="flex justify-between items-start mb-6">
+                  <h1 className="text-4xl font-extrabold text-slate-800 dark:text-slate-100">
+                    {currentNote.title}
+                  </h1>
+
+                  {/* Render Form as Modal Button if data exists */}
+                  {contentToDisplay.length > 0 && (
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
+                    >
+                      <Plus size={18} /> Add Note
+                    </button>
+                  )}
+                </div>
+
+                {contentToDisplay.length > 0 ? (
+                  <div className="grid gap-6">
+                    {activeCategory === "all"
+                      ? // Grouping logic for "All" category
+                        categories
+                          .filter((c) => c.id !== "all")
+                          .map((cat) => {
+                            const items = currentNote.data[cat.id] || [];
+                            if (items.length === 0) return null;
+                            return (
+                              <div key={cat.id} className="space-y-3">
+                                <div className="flex items-center gap-2 text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
+                                  {cat.icon}
+                                  <span className="text-[10px] font-bold uppercase tracking-widest">
+                                    {cat.label}
+                                  </span>
+                                </div>
+                                {items.map((item) => (
+                                  <ContentItem
+                                    key={item.id}
+                                    item={item}
+                                    category={cat.id}
+                                  />
+                                ))}
+                              </div>
+                            );
+                          })
+                      : // Regular category list
+                        contentToDisplay.map((item) => (
+                          <ContentItem
+                            key={item.id}
+                            item={item}
+                            category={activeCategory}
+                          />
+                        ))}
+                  </div>
+                ) : (
+                  /* Render Form as Regular Form if no data for this note/category */
+                  <SmartNoteForm
+                    activeCategory={activeCategory}
+                    activeNoteId={activeNoteId}
+                    activeFolderId={activeFolderId}
+                  />
+                )}
+              </div>
+            ) : (
+              /* No Note or No Folder selected - Render Global Form */
+              <div className="h-full flex items-center justify-center">
+                <SmartNoteForm
+                  activeFolderId={activeFolderId}
+                  activeNoteId={activeNoteId}
+                  activeCategory={activeCategory}
+                />
+              </div>
+            )}
+
+            {/* Modal Version of the Form */}
+            {isModalOpen && (
+              <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 ">
+                <div className="bg-white dark:bg-slate-800 w-full max-w-4xl rounded-3xl p-8 relative dark:border-slate-200">
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  >
+                    <X size={24} />
+                  </button>
+                  <SmartNoteForm
+                    activeFolderId={activeFolderId}
+                    activeNoteId={activeNoteId}
+                    activeCategory={activeCategory}
+                    onSuccess={() => setIsModalOpen(false)}
+                  />
+                </div>
               </div>
             )}
           </section>
@@ -430,12 +530,12 @@ const DeveloperNotebook = () => {
       {menuConfig.id && (
         <>
           <div
-            className="fixed inset-0 z-[60]"
+            className="fixed inset-0 z-60"
             onClick={() => setMenuConfig({ id: null, x: 0, y: 0, type: null })}
           />
           <div
             style={{ top: `${menuConfig.y}px`, left: `${menuConfig.x}px` }}
-            className="fixed w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-[70] py-1 animate-in fade-in zoom-in-95 duration-100 overflow-hidden"
+            className="fixed w-32 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl z-70 py-1 animate-in fade-in zoom-in-95 duration-100 overflow-hidden"
           >
             <button
               onClick={() => {

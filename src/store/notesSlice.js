@@ -172,7 +172,8 @@ const notesSlice = createSlice({
       let folderId = state.activeFolderId;
 
       if (data.folderName) {
-        folderId = Date.now().toString();
+        folderId =
+          Date.now().toString() + Math.random().toString(36).substring(2, 7); // Unique ID
         const newFolder = {
           id: folderId,
           name: data.folderName,
@@ -185,7 +186,8 @@ const notesSlice = createSlice({
         state.activeCategory === "all" ? "notes" : state.activeCategory;
 
       if (!state.activeNoteId && data.noteTitle) {
-        const newNoteId = Date.now().toString();
+        const newNoteId =
+          Date.now().toString() + Math.random().toString(36).substring(2, 7); // Unique ID
 
         state.notes.push({
           id: newNoteId,

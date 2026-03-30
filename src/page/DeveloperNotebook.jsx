@@ -124,6 +124,7 @@ const DeveloperNotebook = () => {
             <>
               <div className="flex items-center justify-between mb-4 px-2">
                 <h3 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest truncate">
+                  Note label:{" "}
                   {folders.find((f) => f.id === activeFolderId)?.name ||
                     "Notes"}
                 </h3>
@@ -142,7 +143,7 @@ const DeveloperNotebook = () => {
                       autoFocus
                       maxLength={50}
                       className="w-full bg-slate-200 dark:bg-slate-800/50 text-slate-900 dark:text-slate-200 rounded-lg p-2 text-sm outline-none border-b-2 border-cyan-500"
-                      placeholder="Note title..."
+                      placeholder="Note label..."
                       value={newNoteTitle}
                       onChange={(e) => setNewNoteTitle(e.target.value)}
                       onBlur={() => setIsAddingNote(false)}
@@ -271,7 +272,7 @@ const DeveloperNotebook = () => {
                   )}
                 </div>
 
-                {contentToDisplay.length > 0 ? (
+                {/* {contentToDisplay.length > 0 ? (
                   <div className="grid gap-6">
                     {activeCategory === "all"
                       ? // Grouping logic for "All" category
@@ -308,12 +309,70 @@ const DeveloperNotebook = () => {
                         ))}
                   </div>
                 ) : (
-                  /* Render Form as Regular Form if no data for this note/category */
                   <SmartNoteForm
                     activeCategory={activeCategory}
                     activeNoteId={activeNoteId}
                     activeFolderId={activeFolderId}
                   />
+                )} */}
+                {contentToDisplay.length > 0 ? (
+                  <div className="w-full">
+                    {" "}
+                    {/* Parent wrapper */}
+                    {activeCategory === "all" ? (
+                      // GROUPED VIEW (Category headers + Grid for each)
+                      <div className="space-y-10">
+                        {categories
+                          .filter((c) => c.id !== "all")
+                          .map((cat) => {
+                            const items = currentNote.data[cat.id] || [];
+                            if (items.length === 0) return null;
+                            return (
+                              <div key={cat.id} className="space-y-4">
+                                {/* Category Header */}
+                                <div className="flex items-center gap-2 text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
+                                  {cat.icon}
+                                  <span className="text-[10px] font-bold uppercase tracking-widest">
+                                    {cat.label}
+                                  </span>
+                                </div>
+
+                                {/* GRID FOR ITEMS */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                  {items.map((item) => (
+                                    <ContentItem
+                                      key={item.id}
+                                      item={item}
+                                      category={cat.id}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    ) : (
+                      // REGULAR CATEGORY VIEW (Just the grid)
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {contentToDisplay.map((item) => (
+                          <ContentItem
+                            key={item.id}
+                            item={item}
+                            category={activeCategory}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Render Form as Regular Form if no data */
+                  <div className="flex justify-center w-full">
+                    <SmartNoteForm
+                      activeCategory={activeCategory}
+                      activeNoteId={activeNoteId}
+                      activeFolderId={activeFolderId}
+                    />
+                  </div>
                 )}
               </div>
             ) : (

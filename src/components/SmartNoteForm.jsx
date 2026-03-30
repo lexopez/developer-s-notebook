@@ -44,6 +44,7 @@ export const SmartNoteForm = ({
       itemData.name = formData.name;
       itemData.url = formData.url;
     } else {
+      itemData.title = formData.title;
       itemData.text = formData.text;
     }
 
@@ -126,12 +127,20 @@ export const SmartNoteForm = ({
           )}
 
           {(activeCategory === "notes" || activeCategory === "all") && (
-            <textarea
-              name="text"
-              placeholder="Write your thoughts..."
-              className="w-full h-48 p-4 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none resize-none"
-              onChange={handleChange}
-            />
+            <>
+              <input
+                name="title" // New Field
+                placeholder="Note Title (e.g., Thoughts on Refactoring)"
+                className="w-full p-3 rounded-xl bg-white dark:bg-slate-900 outline-none dark:text-slate-200"
+                onChange={handleChange}
+              />
+              <textarea
+                name="text"
+                placeholder="Write your thoughts..."
+                className="w-full h-48 p-4 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none resize-none"
+                onChange={handleChange}
+              />
+            </>
           )}
         </div>
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addContentToNote } from "../store/notesSlice";
+import { Favicon } from "./Favicon";
 
 export const SmartNoteForm = ({
   activeCategory,
@@ -28,34 +29,74 @@ export const SmartNoteForm = ({
   const handleFormSubmit = (e) => {
     e.preventDefault();
 
-    // Prepare the specific data object based on category
-    let itemData = {};
     const cat = activeCategory === "all" ? "notes" : activeCategory;
+    const itemData = {};
 
-    if (!activeFolderId && formData.folderName.trim())
+    const isEmpty = (val) => !val || !val.trim();
+
+    // Optional fields
+    if (
+      !activeFolderId &&
+      !isEmpty(formData.folderName) &&
+      formData.folderName.trim().length <= 50
+    ) {
       itemData.folderName = formData.folderName;
-    if (!activeNoteId && formData.noteTitle.trim())
-      itemData.noteTitle = formData.noteTitle;
-
-    if (cat === "code snippets") {
-      itemData.label = formData.label;
-      itemData.code = formData.code;
-    } else if (cat === "side projects" || cat === "resources") {
-      itemData.name = formData.name;
-      itemData.url = formData.url;
-    } else {
-      itemData.title = formData.title;
-      itemData.text = formData.text;
     }
 
-    // 4. Dispatch the final content
+    if (
+      !activeNoteId &&
+      !isEmpty(formData.noteTitle) &&
+      formData.noteTitle.trim().length <= 50
+    ) {
+      itemData.noteTitle = formData.noteTitle;
+    }
+
+    // Category-based config
+    const categoryConfig = {
+      "code snippets": {
+        required: ["label", "code"],
+      },
+      "side projects": {
+        required: ["name", "url"],
+      },
+      resources: {
+        required: ["name", "url"],
+      },
+      default: {
+        required: ["title", "text"],
+      },
+    };
+
+    const config = categoryConfig[cat] || categoryConfig.default;
+
+    // Validate required fields
+    const hasEmptyField = config.required.some((field) =>
+      isEmpty(formData[field]),
+    );
+
+    if (hasEmptyField) return;
+
+    // Validate field lengths
+    if (formData.label && formData.label.trim().length > 100) return;
+    if (formData.code && formData.code.trim().length > 5000) return;
+    if (formData.name && formData.name.trim().length > 100) return;
+    if (formData.url && formData.url.trim().length > 2000) return;
+    if (formData.title && formData.title.trim().length > 100) return;
+    if (formData.text && formData.text.trim().length > 5000) return;
+
+    // Assign required fields dynamically
+    config.required.forEach((field) => {
+      itemData[field] = formData[field];
+    });
+
+    // Dispatch
     dispatch(
       addContentToNote({
         data: itemData,
       }),
     );
 
-    if (onSuccess) onSuccess();
+    onSuccess?.();
   };
 
   return (
@@ -77,6 +118,7 @@ export const SmartNoteForm = ({
               placeholder="No Folder Selected - Create a Folder Name..."
               className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
               onChange={handleChange}
+              maxLength={50}
               required
             />
           )}
@@ -86,6 +128,7 @@ export const SmartNoteForm = ({
               placeholder="No Note Selected - Give this Note a Label..."
               className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
               onChange={handleChange}
+              maxLength={50}
               required
             />
           )}
@@ -95,15 +138,18 @@ export const SmartNoteForm = ({
             <>
               <input
                 name="label"
-                placeholder="Snippet Label (e.g. Tailwind Config)"
+                placeholder="Snippet Name (e.g. Tailwind Config)"
                 className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
                 onChange={handleChange}
+                maxLength={100}
+                required
               />
               <textarea
                 name="code"
                 placeholder="Paste your code here..."
-                className="w-full h-48 p-4 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 font-mono text-sm outline-none resize-none"
+                className="w-full h-48 p-4 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 font-mono text-sm outline-none resize-none no-scrollbar"
                 onChange={handleChange}
+                required
               />
             </>
           )}
@@ -116,13 +162,28 @@ export const SmartNoteForm = ({
                 placeholder="Name..."
                 className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
                 onChange={handleChange}
+                maxLength={100}
+                required
               />
               <input
                 name="url"
                 placeholder="URL (https://...)"
                 className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
                 onChange={handleChange}
+                required
               />
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-dashed border-slate-200 dark:border-slate-800">
+                <Favicon url={formData.url} />
+                <div>
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                    {formData.name ||
+                      `${activeCategory === "side projects" ? "Project" : activeCategory === "resources" ? "Resource" : ""} Preview`}
+                  </h4>
+                  <p className="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">
+                    {formData.url || "Enter a URL above..."}
+                  </p>
+                </div>
+              </div>
             </>
           )}
 
@@ -133,12 +194,15 @@ export const SmartNoteForm = ({
                 placeholder="Note Title (e.g., Thoughts on Refactoring)"
                 className="w-full p-3 rounded-xl bg-white dark:bg-slate-900 outline-none dark:text-slate-200"
                 onChange={handleChange}
+                maxLength={100}
+                required
               />
               <textarea
                 name="text"
                 placeholder="Write your thoughts..."
-                className="w-full h-48 p-4 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none resize-none"
+                className="w-full h-48 p-4 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none resize-none no-scrollbar"
                 onChange={handleChange}
+                required
               />
             </>
           )}

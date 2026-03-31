@@ -122,7 +122,6 @@ const notesSlice = createSlice({
       state.theme = state.theme === "light" ? "dark" : "light";
     },
     addFolder: (state, action) => {
-      console.log("Creating folder:", action.payload.name);
       const newFolder = {
         id: action.payload.id || Date.now().toString(), // Temporary ID until Supabase
         name: action.payload.name,
@@ -209,6 +208,39 @@ const notesSlice = createSlice({
         });
       }
     },
+    deleteContent: (state, action) => {
+      const { category, id } = action.payload;
+
+      const folder = state.folders.find((f) => f.id === state.activeFolderId);
+      if (!folder) return;
+
+      const note = state.notes.find((n) => n.id === state.activeNoteId);
+      if (!note || !note.data[category]) return;
+
+      // Filter out the item by ID
+      note.data[category] = note.data[category].filter(
+        (item) => item.id !== id,
+      );
+    },
+    updateContent: (state, action) => {
+      const { category, id, newData } = action.payload;
+
+      const folder = state.folders.find((f) => f.id === state.activeFolderId);
+      if (!folder) return;
+
+      const note = state.notes.find((n) => n.id === state.activeNoteId);
+      if (!note || !note.data[category]) return;
+
+      const itemIndex = note.data[category].findIndex((item) => item.id === id);
+
+      if (itemIndex !== -1) {
+        // Merge existing item with new data and update the timestamp
+        note.data[category][itemIndex] = {
+          ...note.data[category][itemIndex],
+          ...newData,
+        };
+      }
+    },
   },
 });
 
@@ -224,5 +256,7 @@ export const {
   deleteNote,
   renameNote,
   addContentToNote,
+  deleteContent,
+  updateContent,
 } = notesSlice.actions;
 export default notesSlice.reducer;

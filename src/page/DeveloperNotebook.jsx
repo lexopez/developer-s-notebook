@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   Folder,
@@ -15,6 +15,8 @@ import {
   Trash2,
   Edit3,
   MoreVertical,
+  Search,
+  XCircle,
 } from "lucide-react";
 import {
   setActiveFolder,
@@ -28,7 +30,6 @@ import {
   deleteNote,
   renameNote,
 } from "../store/notesSlice";
-import { SmartNoteCreator } from "../components/SmartNoteCreator";
 import { ContentItem } from "../components/ContentItem";
 import { SmartNoteForm } from "../components/SmartNoteForm";
 
@@ -59,6 +60,8 @@ const DeveloperNotebook = () => {
     y: 0,
     type: null,
   });
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (theme === "dark") {
@@ -101,6 +104,33 @@ const DeveloperNotebook = () => {
 
     setMenuConfig({ id, x: xPos, y: rect.top, type });
   };
+
+  const filterItems = (items) => {
+    if (!searchQuery.trim()) return items;
+
+    // 1. Split the query into lowercase words and remove empty strings
+    const keywords = searchQuery
+      .toLowerCase()
+      .split(/\s+/)
+      .filter((word) => word.length > 0);
+
+    return items.filter((item) => {
+      // 2. Identify the target string based on the category structure
+      const targetString = (
+        item.label ||
+        item.title ||
+        item.name ||
+        ""
+      ).toLowerCase();
+
+      // 3. "Every" keyword must be present in the target string
+      // .includes() checks if the word exists, regardless of where it is
+      return keywords.every((word) => targetString.includes(word));
+    });
+  };
+
+  // 2. Determine what to display based on category AND search
+  const filteredContent = filterItems(contentToDisplay);
 
   return (
     <div className="h-screen w-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden px-[10vw] py-[10vh]">
@@ -272,50 +302,33 @@ const DeveloperNotebook = () => {
                   )}
                 </div>
 
-                {/* {contentToDisplay.length > 0 ? (
-                  <div className="grid gap-6">
-                    {activeCategory === "all"
-                      ? // Grouping logic for "All" category
-                        categories
-                          .filter((c) => c.id !== "all")
-                          .map((cat) => {
-                            const items = currentNote.data[cat.id] || [];
-                            if (items.length === 0) return null;
-                            return (
-                              <div key={cat.id} className="space-y-3">
-                                <div className="flex items-center gap-2 text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                  {cat.icon}
-                                  <span className="text-[10px] font-bold uppercase tracking-widest">
-                                    {cat.label}
-                                  </span>
-                                </div>
-                                {items.map((item) => (
-                                  <ContentItem
-                                    key={item.id}
-                                    item={item}
-                                    category={cat.id}
-                                  />
-                                ))}
-                              </div>
-                            );
-                          })
-                      : // Regular category list
-                        contentToDisplay.map((item) => (
-                          <ContentItem
-                            key={item.id}
-                            item={item}
-                            category={activeCategory}
-                          />
-                        ))}
+                {/* SEARCH BAR SECTION */}
+                {contentToDisplay.length > 0 && (
+                  <div className="max-w-6xl mx-auto mb-8 animate-in fade-in slide-in-from-top-2">
+                    <div className="relative group">
+                      <Search
+                        size={18}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-500 transition-colors"
+                      />
+                      <input
+                        type="text"
+                        placeholder={`Search in ${activeCategory}...`}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-12 py-4 bg-slate-50 dark:text-slate-200 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl outline-none focus:border-cyan-500/50 focus:ring-4 focus:ring-cyan-500/5 transition-all text-sm"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                        >
+                          <XCircle size={18} />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  <SmartNoteForm
-                    activeCategory={activeCategory}
-                    activeNoteId={activeNoteId}
-                    activeFolderId={activeFolderId}
-                  />
-                )} */}
-                {contentToDisplay.length > 0 ? (
+                )}
+                {filteredContent.length > 0 ? (
                   <div className="w-full">
                     {" "}
                     {/* Parent wrapper */}
@@ -325,20 +338,29 @@ const DeveloperNotebook = () => {
                         {categories
                           .filter((c) => c.id !== "all")
                           .map((cat) => {
-                            const items = currentNote.data[cat.id] || [];
+                            const items = filterItems(
+                              currentNote.data[cat.id] || [],
+                            );
                             if (items.length === 0) return null;
                             return (
                               <div key={cat.id} className="space-y-4">
-                                {/* Category Header */}
-                                <div className="flex items-center gap-2 text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-2">
-                                  {cat.icon}
-                                  <span className="text-[10px] font-bold uppercase tracking-widest">
+                                {/* Category Header with Badge */}
+                                <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                                  <div className="text-cyan-500">
+                                    {cat.icon}
+                                  </div>
+                                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                                     {cat.label}
                                   </span>
+                                  {/* The Count Badge */}
+                                  <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                    {items.length}
+                                  </span>
+                                  <div className="flex-1 h-[1px] bg-gradient-to-r from-slate-100 dark:from-slate-800 to-transparent"></div>
                                 </div>
 
                                 {/* GRID FOR ITEMS */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-6">
                                   {items.map((item) => (
                                     <ContentItem
                                       key={item.id}
@@ -352,26 +374,50 @@ const DeveloperNotebook = () => {
                           })}
                       </div>
                     ) : (
-                      // REGULAR CATEGORY VIEW (Just the grid)
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {contentToDisplay.map((item) => (
-                          <ContentItem
-                            key={item.id}
-                            item={item}
-                            category={activeCategory}
-                          />
-                        ))}
+                      /* Regular Category View Header (Optional) */
+                      <div className="space-y-6">
+                        <div className="flex items-center gap-2 mb-6">
+                          <span className="px-3 py-1 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-bold">
+                            Showing {filteredContent.length} items
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+                          {filteredContent.map((item) => (
+                            <ContentItem
+                              key={item.id}
+                              item={item}
+                              category={activeCategory}
+                            />
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
                 ) : (
-                  /* Render Form as Regular Form if no data */
-                  <div className="flex justify-center w-full">
-                    <SmartNoteForm
-                      activeCategory={activeCategory}
-                      activeNoteId={activeNoteId}
-                      activeFolderId={activeFolderId}
-                    />
+                  <div className="flex flex-col items-center justify-center text-center">
+                    {contentToDisplay.length > 0 ? (
+                      <>
+                        <Search
+                          size={48}
+                          className="text-slate-200 dark:text-slate-800 mb-4"
+                        />
+                        <p className="text-slate-400 text-sm font-medium">
+                          No results found for "{searchQuery}"
+                        </p>
+                        <button
+                          onClick={() => setSearchQuery("")}
+                          className="mt-2 text-cyan-500 text-xs font-bold hover:underline cursor-pointer"
+                        >
+                          Clear Search
+                        </button>
+                      </>
+                    ) : (
+                      <SmartNoteForm
+                        activeCategory={activeCategory}
+                        activeNoteId={activeNoteId}
+                        activeFolderId={activeFolderId}
+                      />
+                    )}
                   </div>
                 )}
               </div>

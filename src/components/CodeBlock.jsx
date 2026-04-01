@@ -39,7 +39,7 @@ export const CodeBlock = ({ code, language = "javascript" }) => {
             onClick={handleCopy}
             className={`cursor-pointer flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 ${
               copied
-                ? "text-green-400 bg-green-400/10"
+                ? "text-cyan-400 bg-cyan-400/10"
                 : "text-slate-400 hover:text-white hover:bg-white/5"
             }`}
           >

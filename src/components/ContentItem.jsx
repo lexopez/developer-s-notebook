@@ -85,7 +85,7 @@ export const ContentItem = ({ item, category }) => {
         className={`group relative p-5 h-32 flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all hover:border-cyan-500/50 hover:shadow-lg ${category !== "side projects" && category !== "resources" ? "cursor-pointer" : ""}`}
       >
         {/* Action Overlay for Grid Card */}
-        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-2 right-2 flex gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
           {showDeleteConfirm ? (
             <div className="flex items-center gap-1 bg-red-500 rounded-lg p-1 animate-in slide-in-from-right-2">
               <button

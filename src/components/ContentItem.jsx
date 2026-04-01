@@ -1,15 +1,16 @@
-import { Maximize2, X, Trash2, Edit3, Eye, Check } from "lucide-react";
+import { Maximize2, X, Edit3, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux"; // Assuming you have delete/update actions
 import { deleteContent, updateContent } from "../store/notesSlice";
 import { CodeBlock } from "./CodeBlock";
 import { Favicon } from "./Favicon";
+import DeleteButton from "./DeleteButton";
+import EditButton from "./EditButton";
 
 export const ContentItem = ({ item, category }) => {
   const dispatch = useDispatch();
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Edit State
   const [editMode, setEditMode] = useState("view"); // "view" or "edit"
@@ -17,10 +18,8 @@ export const ContentItem = ({ item, category }) => {
 
   const [isEditingSimple, setIsEditingSimple] = useState(false);
 
-  const handleDelete = (e) => {
-    e.stopPropagation();
+  const handleDelete = () => {
     dispatch(deleteContent({ id: item.id, category }));
-    setShowDeleteConfirm(false);
   };
 
   const handleSaveEdit = () => {
@@ -86,56 +85,21 @@ export const ContentItem = ({ item, category }) => {
       >
         {/* Action Overlay for Grid Card */}
         <div className="absolute top-2 right-2 flex gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
-          {showDeleteConfirm ? (
-            <div className="flex items-center gap-1 bg-red-500 rounded-lg p-1 animate-in slide-in-from-right-2">
-              <button
-                onClick={handleDelete}
-                className="p-1 text-white hover:bg-white/20 rounded cursor-pointer"
-              >
-                <Check size={12} />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDeleteConfirm(false);
-                }}
-                className="p-1 text-white hover:bg-white/20 rounded cursor-pointer"
-              >
-                <X size={12} />
-              </button>
-            </div>
-          ) : (
-            <>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDeleteConfirm(true);
-                }}
-                className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-red-500 rounded-xl transition-colors cursor-pointer"
-              >
-                <Trash2 size={14} />
-              </button>
-              {/* NEW EDIT BUTTON */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isExpandable) {
-                    setIsExpanded(true);
-                    setEditMode("edit");
-                  } else {
-                    setIsEditingSimple(true);
-                  }
-                }}
-                className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-cyan-500 rounded-xl transition-colors cursor-pointer"
-              >
-                <Edit3 size={14} />
-              </button>
-            </>
-          )}
+          <EditButton
+            editItem={() => {
+              if (isExpandable) {
+                setIsExpanded(true);
+                setEditMode("edit");
+              } else {
+                setIsEditingSimple(true);
+              }
+            }}
+          />
+          <DeleteButton handleDelete={handleDelete} />
         </div>
 
         <div className="flex justify-between items-start gap-2">
-          <span className="text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-2 pr-6">
+          <span className="text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-2 pr-6 capitalize">
             {category === "code snippets"
               ? item.label
               : category === "notes"
@@ -163,14 +127,14 @@ export const ContentItem = ({ item, category }) => {
           {isExpandable && (
             <Maximize2
               size={12}
-              className="text-slate-300 group-hover:text-cyan-500"
+              className="lg:text-slate-300 text-cyan-500 lg:group-hover:text-cyan-500"
             />
           )}
         </div>
       </div>
 
       {isEditingSimple && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-800 w-full max-w-3xl max-h-[85vh] rounded-3xl overflow-hidden relative flex flex-col">
             {/* Modal Header */}
             <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
@@ -178,9 +142,6 @@ export const ContentItem = ({ item, category }) => {
                 <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
                   Update Details
                 </h2>
-                <p className="text-[10px] font-black text-cyan-500 uppercase tracking-[0.2em] mb-1">
-                  Editing {category}
-                </p>
               </div>
 
               <div className="flex items-center gap-2">
@@ -188,39 +149,11 @@ export const ContentItem = ({ item, category }) => {
                   onClick={() => {
                     handleSaveEdit();
                   }}
-                  className="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                  className="shrink-0 px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
                 >
                   Save Changes
                 </button>
-                {showDeleteConfirm ? (
-                  <div className="flex items-center gap-1 bg-red-500 rounded-lg p-1 animate-in slide-in-from-right-2">
-                    <button
-                      onClick={handleDelete}
-                      className="p-1 text-white hover:bg-white/20 rounded cursor-pointer"
-                    >
-                      <Check size={12} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowDeleteConfirm(false);
-                      }}
-                      className="p-1 text-white hover:bg-white/20 rounded cursor-pointer"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowDeleteConfirm(true);
-                    }}
-                    className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-red-500 rounded-xl transition-colors cursor-pointer"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
+                <DeleteButton handleDelete={handleDelete} />
                 <button
                   onClick={() => {
                     setIsEditingSimple(false);
@@ -301,42 +234,14 @@ export const ContentItem = ({ item, category }) => {
                 >
                   <Edit3 size={14} /> Edit
                 </button>
-                {showDeleteConfirm ? (
-                  <div className="flex items-center gap-1 bg-red-500 rounded-lg p-1 animate-in slide-in-from-right-2">
-                    <button
-                      onClick={handleDelete}
-                      className="p-1 text-white hover:bg-white/20 rounded cursor-pointer"
-                    >
-                      <Check size={12} />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowDeleteConfirm(false);
-                      }}
-                      className="p-1 text-white hover:bg-white/20 rounded cursor-pointer"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowDeleteConfirm(true);
-                    }}
-                    className="p-2 bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-red-500 rounded-xl transition-colors cursor-pointer"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
+                <DeleteButton handleDelete={handleDelete} />
               </div>
 
               <div className="flex items-center gap-2">
                 {editMode === "edit" && (
                   <button
                     onClick={handleSaveEdit}
-                    className="px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                    className="shrink-0 px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
                   >
                     Save Changes
                   </button>

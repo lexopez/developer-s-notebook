@@ -8,12 +8,18 @@ import NoteItems from "./NoteItems";
 import { SmartNoteForm } from "./SmartNoteForm";
 import MainModalForm from "./MainModalForm";
 
-export default function MainContent({ currentNote }) {
-  const { activeFolderId, activeNoteId, activeCategory } = useSelector(
+export default function MainContent({
+  currentNote,
+  isModalOpen,
+  setIsModalOpen,
+}) {
+  const { activeFolderId, activeNoteId, activeCategory, folders } = useSelector(
     (state) => state.notes,
   );
+
+  const currentFolder = folders.find((f) => f.id === activeFolderId);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getActiveContent = () => {
     if (!currentNote) return [];
@@ -67,8 +73,11 @@ export default function MainContent({ currentNote }) {
       <section className="flex-1 p-10 overflow-y-auto no-scrollbar relative">
         {currentNote ? (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="flex justify-between items-start mb-6">
-              <h1 className="text-4xl font-extrabold text-slate-800 dark:text-slate-100">
+            <p className="lg:hidden text-slate-500 dark:text-slate-400 text-xs">
+              {currentFolder.name} folder / {currentNote.title} note
+            </p>
+            <div className="flex justify-between items-end mb-6">
+              <h1 className="lg:text-4xl font-extrabold text-slate-800 dark:text-slate-100">
                 {currentNote.title}
               </h1>
 

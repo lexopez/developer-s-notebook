@@ -80,7 +80,7 @@ export const MainLayout = () => {
       </aside>
 
       {/* MOBILE BOTTOM NAV (Visible only on mobile) */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-2 flex justify-around items-center z-50">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-1 flex justify-around items-center z-50">
         <button
           className={`p-3 ${activeDrawer === "folders" ? "text-cyan-500" : "text-slate-400"}`}
           onClick={() => setActiveDrawer("folders")}

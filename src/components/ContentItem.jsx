@@ -135,7 +135,7 @@ export const ContentItem = ({ item, category }) => {
 
       {isEditingSimple && (
         <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-800 w-full max-w-3xl max-h-[85vh] rounded-3xl overflow-hidden relative flex flex-col">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-3xl max-h-[85vh] rounded-2xl overflow-hidden relative flex flex-col">
             {/* Modal Header */}
             <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
               <div>
@@ -151,7 +151,7 @@ export const ContentItem = ({ item, category }) => {
                   }}
                   className="shrink-0 px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
                 >
-                  Save Changes
+                  Save
                 </button>
                 <DeleteButton handleDelete={handleDelete} />
                 <button
@@ -166,7 +166,7 @@ export const ContentItem = ({ item, category }) => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-8 overflow-y-auto no-scrollbar flex-1 bg-white dark:bg-[#0f1115]">
+            <div className="p-2 overflow-y-auto no-scrollbar flex-1 bg-white dark:bg-[#0f1115]">
               <div className="space-y-6 animate-in fade-in">
                 <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-dashed border-slate-200 dark:border-slate-800">
                   <Favicon url={tempData.url} />
@@ -218,19 +218,19 @@ export const ContentItem = ({ item, category }) => {
       {/* EXPANDED MODAL */}
       {isExpanded && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-800 w-full max-w-3xl max-h-[85vh] rounded-3xl overflow-hidden relative flex flex-col">
+          <div className="bg-white dark:bg-slate-800 w-full max-w-3xl max-h-[85vh] rounded-2xl overflow-hidden relative flex flex-col">
             {/* Modal Header */}
             <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
               <div className="flex gap-1 bg-slate-200/50 dark:bg-slate-800 p-1 rounded-xl">
                 <button
                   onClick={() => setEditMode("view")}
-                  className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${editMode === "view" ? "bg-white dark:bg-slate-700 shadow-sm text-cyan-600 cursor-pointer" : "text-slate-500 hover:text-slate-700 cursor-pointer"}`}
+                  className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-all ${editMode === "view" ? "bg-white dark:bg-slate-700 shadow-sm text-cyan-600 cursor-pointer" : "text-slate-500 hover:text-slate-700 cursor-pointer"}`}
                 >
                   <Eye size={14} /> View
                 </button>
                 <button
                   onClick={() => setEditMode("edit")}
-                  className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${editMode === "edit" ? "bg-white dark:bg-slate-700 shadow-sm text-cyan-600 cursor-pointer" : "text-slate-500 hover:text-slate-700 cursor-pointer"}`}
+                  className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-all ${editMode === "edit" ? "bg-white dark:bg-slate-700 shadow-sm text-cyan-600 cursor-pointer" : "text-slate-500 hover:text-slate-700 cursor-pointer"}`}
                 >
                   <Edit3 size={14} /> Edit
                 </button>
@@ -243,7 +243,7 @@ export const ContentItem = ({ item, category }) => {
                     onClick={handleSaveEdit}
                     className="shrink-0 px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
                   >
-                    Save Changes
+                    Save
                   </button>
                 )}
                 <button
@@ -259,7 +259,7 @@ export const ContentItem = ({ item, category }) => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-1 overflow-y-auto no-scrollbar flex-1 bg-white dark:bg-[#0f1115] ">
+            <div className="p-2 overflow-y-auto no-scrollbar flex-1 bg-white dark:bg-[#0f1115] ">
               {editMode === "view" ? (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 ">
                   <div className="flex flex-col gap-6">

@@ -259,9 +259,9 @@ export const ContentItem = ({ item, category }) => {
             </div>
 
             {/* Modal Body */}
-            <div className="p-8 overflow-y-auto no-scrollbar flex-1 bg-white dark:bg-[#0f1115]">
+            <div className="p-1 overflow-y-auto no-scrollbar flex-1 bg-white dark:bg-[#0f1115] ">
               {editMode === "view" ? (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 ">
                   <div className="flex flex-col gap-6">
                     {category === "code snippets" ? (
                       <>

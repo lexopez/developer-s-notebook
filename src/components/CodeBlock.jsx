@@ -24,7 +24,7 @@ export const CodeBlock = ({ code, language = "javascript" }) => {
   };
 
   return (
-    <div className="relative group rounded-2xl overflow-hidden border border-slate-800 bg-[#1d1f21] animate-in fade-in zoom-in-95 duration-300">
+    <div className="relative group rounded-3xl overflow-hidden border border-slate-800 bg-[#1d1f21] animate-in fade-in zoom-in-95 duration-300">
       {/* Terminal Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-[#282a2e] border-b border-slate-800">
         <div className="flex gap-2">

@@ -73,12 +73,15 @@ export default function MainContent({
       <section className="flex-1 p-10 overflow-y-auto no-scrollbar relative">
         {currentNote ? (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <p className="lg:hidden text-slate-500 dark:text-slate-400 text-xs">
-              {currentFolder.name} folder / {currentNote.title.slice(0, 30)}
-              {"..."}
+            <p className="lg:hidden text-slate-500 dark:text-slate-400 text-xs capitalize">
+              {currentFolder.name} folder /{" "}
+              {currentNote.title.length > 30
+                ? currentNote.title.slice(0, 30) + "..."
+                : currentNote.title}
             </p>
             <div className="flex justify-between items-end mb-6 border-b border-slate-200 dark:border-slate-800 pb-1">
-              <h1 className="lg:text-4xl font-extrabold text-slate-800 dark:text-slate-100">
+              <h1 className="lg:text-4xl font-extrabold text-slate-800 dark:text-slate-100 capitalize">
+                <span className="lg:hidden">Note Label: </span>
                 {currentNote.title}
               </h1>
 
@@ -151,9 +154,15 @@ export default function MainContent({
               </div>
             ) : (
               <>
-                <p className="text-slate-400 text-sm font-medium text-center">
-                  No Notes found. Please create a new note by clicking the plus
-                  button below
+                <p className="text-slate-400 text-sm font-medium text-center mb-4">
+                  No Notes found for {activeCategory} category.{" "}
+                  <span className="lg:hidden">
+                    Please create a new note by clicking the plus(+) button
+                    below
+                  </span>
+                  <span className="hidden lg:block">
+                    Please create a new note by filling out the form below.
+                  </span>
                 </p>
                 <div className="hidden lg:flex flex-col items-center justify-center text-center">
                   {contentToDisplay.length > 0 ? (
@@ -184,14 +193,25 @@ export default function MainContent({
             )}
           </div>
         ) : (
+          <>
+            <p className="text-slate-400 text-sm font-medium text-center">
+              No Notes found.{" "}
+              <span className="lg:hidden">
+                Please create a new note by clicking the plus(+) button below
+              </span>
+              <span className="hidden lg:block">
+                Please create a new note by filling out the form below.
+              </span>
+            </p>
+            <div className="h-full hidden lg:flex items-center justify-center">
+              <SmartNoteForm
+                activeFolderId={activeFolderId}
+                activeNoteId={activeNoteId}
+                activeCategory={activeCategory}
+              />
+            </div>
+          </>
           /* No Note or No Folder selected - Render Global Form */
-          <div className="h-full flex items-center justify-center">
-            <SmartNoteForm
-              activeFolderId={activeFolderId}
-              activeNoteId={activeNoteId}
-              activeCategory={activeCategory}
-            />
-          </div>
         )}
 
         {/* Modal Version of the Form */}

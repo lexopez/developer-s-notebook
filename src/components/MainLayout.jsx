@@ -10,7 +10,7 @@ import {
   setActiveNote,
 } from "../store/notesSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { SidebarList } from "./Sidebar";
+import { SidebarList } from "./SidebarList";
 import MainContent from "./MainContent";
 import MobileHeader from "./MobileHeader";
 import { useState } from "react";
@@ -85,7 +85,8 @@ export const MainLayout = () => {
           className={`p-3 ${activeDrawer === "folders" ? "text-cyan-500" : "text-slate-400"}`}
           onClick={() => setActiveDrawer("folders")}
         >
-          <Folder size={24} />
+          <Folder size={24} className="m-auto" />
+          Folders
         </button>
         <button
           className={`p-4 bg-cyan-600 text-white rounded-2xl ${isModalOpen ? "-translate-y-4" : ""} shadow-lg`}
@@ -97,7 +98,8 @@ export const MainLayout = () => {
           className={`p-3 ${activeDrawer === "notes" ? "text-cyan-500" : "text-slate-400"}`}
           onClick={() => setActiveDrawer("notes")}
         >
-          <FileText size={24} />
+          <FileText size={24} className="m-auto" />
+          Notes
         </button>
       </nav>
 
@@ -110,6 +112,7 @@ export const MainLayout = () => {
         title="Manage Folders"
       >
         <SidebarList
+          title="Folders"
           items={folders}
           activeId={activeFolderId}
           Icon={Folder}
@@ -129,9 +132,10 @@ export const MainLayout = () => {
       <MobileDrawer
         isOpen={activeDrawer === "notes"}
         onClose={() => setActiveDrawer(null)}
-        title="Select Note"
+        title="Select Note Label"
       >
         <SidebarList
+          title="Note Labels"
           items={sidebarNotes}
           activeId={activeNoteId}
           Icon={FileText}

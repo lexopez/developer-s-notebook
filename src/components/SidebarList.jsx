@@ -117,6 +117,11 @@ export const SidebarList = ({
               )}
             </div>
           ))}
+          {items.length === 0 && (
+            <p className="text-slate-400 text-sm font-medium text-center mt-4">
+              No {title} yet. Click the plus button to add one!
+            </p>
+          )}
         </div>
       </div>
     </>

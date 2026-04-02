@@ -105,7 +105,7 @@ export const SmartNoteForm = ({
         onSubmit={handleFormSubmit}
         className="w-full max-w-4xl space-y-4 animate-in fade-in duration-500 mx-auto"
       >
-        <div className="p-6 rounded-3xl bg-cyan-50/50 dark:bg-cyan-900/10 border border-cyan-100 dark:border-cyan-900/30 space-y-4">
+        <div className="p-2 rounded-3xl bg-white dark:bg-[#0f1115] border border-cyan-100 dark:border-[#0f1115] space-y-4">
           <div className="flex items-center justify-center gap-2 mb-2">
             <span className="text-xs font-bold uppercase tracking-tighter text-cyan-600">
               {activeCategory === "all" ? "Notes" : activeCategory}
@@ -116,7 +116,7 @@ export const SmartNoteForm = ({
             <input
               name="folderName"
               placeholder="No Folder Selected - Create a Folder Name..."
-              className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
+              className="w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
               onChange={handleChange}
               maxLength={50}
               required
@@ -126,7 +126,7 @@ export const SmartNoteForm = ({
             <input
               name="noteTitle"
               placeholder="No Note Selected - Give this Note a Label..."
-              className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
+              className="w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
               onChange={handleChange}
               maxLength={50}
               required
@@ -139,7 +139,7 @@ export const SmartNoteForm = ({
               <input
                 name="label"
                 placeholder="Snippet Name (e.g. Tailwind Config)"
-                className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
+                className="w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
                 onChange={handleChange}
                 maxLength={100}
                 required
@@ -147,7 +147,7 @@ export const SmartNoteForm = ({
               <textarea
                 name="code"
                 placeholder="Paste your code here..."
-                className="w-full h-48 p-4 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 font-mono text-sm outline-none resize-none no-scrollbar"
+                className="w-full h-48 p-4 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 font-mono text-sm outline-none resize-none no-scrollbar"
                 onChange={handleChange}
                 required
               />
@@ -160,7 +160,7 @@ export const SmartNoteForm = ({
               <input
                 name="name"
                 placeholder="Name..."
-                className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
+                className="w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
                 onChange={handleChange}
                 maxLength={100}
                 required
@@ -168,7 +168,7 @@ export const SmartNoteForm = ({
               <input
                 name="url"
                 placeholder="URL (https://...)"
-                className="w-full p-3 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none"
+                className="w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
                 onChange={handleChange}
                 required
               />
@@ -192,7 +192,7 @@ export const SmartNoteForm = ({
               <input
                 name="title" // New Field
                 placeholder="Note Title (e.g., Thoughts on Refactoring)"
-                className="w-full p-3 rounded-xl bg-white dark:bg-slate-900 outline-none dark:text-slate-200"
+                className="w-full p-3 rounded-xl bg-slate-100 dark:bg-slate-900 outline-none dark:text-slate-200"
                 onChange={handleChange}
                 maxLength={100}
                 required
@@ -200,7 +200,7 @@ export const SmartNoteForm = ({
               <textarea
                 name="text"
                 placeholder="Write your thoughts..."
-                className="w-full h-48 p-4 rounded-xl bg-white dark:text-slate-200 dark:bg-slate-900 outline-none resize-none no-scrollbar"
+                className="w-full h-48 p-4 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none resize-none no-scrollbar"
                 onChange={handleChange}
                 required
               />
@@ -212,7 +212,7 @@ export const SmartNoteForm = ({
           type="submit"
           className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-2xl transition-all transform active:scale-[0.98] cursor-pointer"
         >
-          Create a Note
+          Create
         </button>
       </form>
     </div>

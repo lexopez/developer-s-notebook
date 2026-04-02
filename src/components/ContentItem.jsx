@@ -168,16 +168,10 @@ export const ContentItem = ({ item, category }) => {
             {/* Modal Body */}
             <div className="p-2 overflow-y-auto no-scrollbar flex-1 bg-white dark:bg-[#0f1115]">
               <div className="space-y-6 animate-in fade-in">
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-dashed border-slate-200 dark:border-slate-800">
-                  <Favicon url={tempData.url} />
-                  <div>
-                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                      {tempData.name || "Project Preview"}
-                    </h4>
-                    <p className="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">
-                      {tempData.url || "Enter a URL below..."}
-                    </p>
-                  </div>
+                <div className="flex items-center justify-center gap-2 mb-2">
+                  <span className="text-xs font-bold uppercase tracking-tighter text-cyan-600">
+                    {category === "all" ? "Notes" : category}
+                  </span>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
@@ -208,6 +202,17 @@ export const ContentItem = ({ item, category }) => {
                     maxLength={2000}
                     required
                   />
+                </div>
+                <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-dashed border-slate-200 dark:border-slate-800">
+                  <Favicon url={tempData.url} />
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                      {tempData.name || "Project Preview"}
+                    </h4>
+                    <p className="text-[10px] text-slate-400 font-mono truncate max-w-[200px]">
+                      {tempData.url || "Enter a URL below..."}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -260,6 +265,11 @@ export const ContentItem = ({ item, category }) => {
 
             {/* Modal Body */}
             <div className="p-2 overflow-y-auto no-scrollbar flex-1 bg-white dark:bg-[#0f1115] ">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="text-xs font-bold uppercase tracking-tighter text-cyan-600">
+                  {category === "all" ? "Notes" : category}
+                </span>
+              </div>
               {editMode === "view" ? (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 ">
                   <div className="flex flex-col gap-6">

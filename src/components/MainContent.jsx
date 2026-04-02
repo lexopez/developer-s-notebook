@@ -74,9 +74,10 @@ export default function MainContent({
         {currentNote ? (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <p className="lg:hidden text-slate-500 dark:text-slate-400 text-xs">
-              {currentFolder.name} folder / {currentNote.title} note
+              {currentFolder.name} folder / {currentNote.title.slice(0, 30)}
+              {"..."}
             </p>
-            <div className="flex justify-between items-end mb-6">
+            <div className="flex justify-between items-end mb-6 border-b border-slate-200 dark:border-slate-800 pb-1">
               <h1 className="lg:text-4xl font-extrabold text-slate-800 dark:text-slate-100">
                 {currentNote.title}
               </h1>
@@ -149,31 +150,37 @@ export default function MainContent({
                 )}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center text-center">
-                {contentToDisplay.length > 0 ? (
-                  <>
-                    <Search
-                      size={48}
-                      className="text-slate-200 dark:text-slate-800 mb-4"
+              <>
+                <p className="text-slate-400 text-sm font-medium text-center">
+                  No Notes found. Please create a new note by clicking the plus
+                  button below
+                </p>
+                <div className="hidden lg:flex flex-col items-center justify-center text-center">
+                  {contentToDisplay.length > 0 ? (
+                    <>
+                      <Search
+                        size={48}
+                        className="text-slate-200 dark:text-slate-800 mb-4"
+                      />
+                      <p className="text-slate-400 text-sm font-medium">
+                        No results found for "{searchQuery}"
+                      </p>
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="mt-2 text-cyan-500 text-xs font-bold hover:underline cursor-pointer"
+                      >
+                        Clear Search
+                      </button>
+                    </>
+                  ) : (
+                    <SmartNoteForm
+                      activeCategory={activeCategory}
+                      activeNoteId={activeNoteId}
+                      activeFolderId={activeFolderId}
                     />
-                    <p className="text-slate-400 text-sm font-medium">
-                      No results found for "{searchQuery}"
-                    </p>
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="mt-2 text-cyan-500 text-xs font-bold hover:underline cursor-pointer"
-                    >
-                      Clear Search
-                    </button>
-                  </>
-                ) : (
-                  <SmartNoteForm
-                    activeCategory={activeCategory}
-                    activeNoteId={activeNoteId}
-                    activeFolderId={activeFolderId}
-                  />
-                )}
-              </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         ) : (

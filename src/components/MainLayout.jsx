@@ -1,13 +1,8 @@
 import { FileText, Folder, Plus } from "lucide-react";
 import {
-  addFolder,
-  addNote,
-  deleteFolder,
-  deleteNote,
-  renameFolder,
-  renameNote,
   setActiveFolder,
   setActiveNote,
+  setActiveDrawer,
 } from "../store/notesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { SidebarList } from "./SidebarList";
@@ -18,15 +13,13 @@ import MobileDrawer from "./MobileDrawer";
 
 export const MainLayout = () => {
   const dispatch = useDispatch();
-  const { folders, notes, activeFolderId, activeNoteId } = useSelector(
-    (state) => state.notes,
-  );
+  const { folders, notes, activeFolderId, activeNoteId, activeDrawer } =
+    useSelector((state) => state.notes);
 
-  const sidebarNotes = notes.filter((n) => n.folderId === activeFolderId);
   const currentNote = notes.find((n) => n.id === activeNoteId);
 
   // Mobile UI State
-  const [activeDrawer, setActiveDrawer] = useState(null); // 'folders' | 'notes' | 'menu' | null
+  // const [activeDrawer, setActiveDrawer] = useState(null); // 'folders' | 'notes' | 'menu' | null
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -36,21 +29,7 @@ export const MainLayout = () => {
 
       {/* LEFT SIDEBAR: NOTES (Hidden on mobile) */}
       <aside className="hidden lg:flex w-[18%] flex-col p-4">
-        {currentNote && currentNote.length !== 0 && (
-          <SidebarList
-            title="Note Labels"
-            items={sidebarNotes}
-            activeId={activeNoteId}
-            Icon={FileText}
-            placeholder="New note..."
-            onSelect={(id) => dispatch(setActiveNote(id))}
-            onAdd={(name) =>
-              dispatch(addNote({ id: Date.now().toString(), title: name }))
-            }
-            onRename={(id, name) => dispatch(renameNote({ id, name }))}
-            onDelete={(id) => dispatch(deleteNote(id))}
-          />
-        )}
+        {notes.length !== 0 && <SidebarList title="Note Labels" />}
       </aside>
 
       {/* MAIN EDITOR (Full width on mobile) */}
@@ -62,20 +41,8 @@ export const MainLayout = () => {
 
       {/* RIGHT SIDEBAR: FOLDERS (Hidden on mobile) */}
       <aside className="hidden lg:flex w-[18%] flex-col p-4">
-        {folders.length !== 0 && (
-          <SidebarList
-            title="Folders"
-            items={folders}
-            activeId={activeFolderId}
-            Icon={Folder}
-            placeholder="New folder..."
-            onSelect={(id) => dispatch(setActiveFolder(id))}
-            onAdd={(name) =>
-              dispatch(addFolder({ id: Date.now().toString(), name }))
-            }
-            onRename={(id, name) => dispatch(renameFolder({ id, name }))}
-            onDelete={(id) => dispatch(deleteFolder(id))}
-          />
+        {(folders.length !== 0 || notes.length !== 0) && (
+          <SidebarList title="Folders" />
         )}
       </aside>
 
@@ -83,7 +50,7 @@ export const MainLayout = () => {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-1 flex justify-around items-center z-50">
         <button
           className={`p-3 ${activeDrawer === "folders" ? "text-cyan-500" : "text-slate-400"}`}
-          onClick={() => setActiveDrawer("folders")}
+          onClick={() => dispatch(setActiveDrawer("folders"))}
         >
           <Folder size={24} className="m-auto" />
           Folders
@@ -96,7 +63,7 @@ export const MainLayout = () => {
         </button>
         <button
           className={`p-3 ${activeDrawer === "notes" ? "text-cyan-500" : "text-slate-400"}`}
-          onClick={() => setActiveDrawer("notes")}
+          onClick={() => dispatch(setActiveDrawer("notes"))}
         >
           <FileText size={24} className="m-auto" />
           Notes
@@ -108,47 +75,19 @@ export const MainLayout = () => {
       {/* Folder Drawer */}
       <MobileDrawer
         isOpen={activeDrawer === "folders"}
-        onClose={() => setActiveDrawer(null)}
+        onClose={() => dispatch(setActiveDrawer(null))}
         title="Manage Folders"
       >
-        <SidebarList
-          title="Folders"
-          items={folders}
-          activeId={activeFolderId}
-          Icon={Folder}
-          onSelect={(id) => {
-            dispatch(setActiveFolder(id));
-            setActiveDrawer(null);
-          }}
-          onAdd={(name) =>
-            dispatch(addFolder({ id: Date.now().toString(), name }))
-          }
-          onRename={(id, name) => dispatch(renameFolder({ id, name }))}
-          onDelete={(id) => dispatch(deleteFolder(id))}
-        />
+        <SidebarList title="Folders" />
       </MobileDrawer>
 
       {/* Notes Drawer */}
       <MobileDrawer
         isOpen={activeDrawer === "notes"}
-        onClose={() => setActiveDrawer(null)}
+        onClose={() => dispatch(setActiveDrawer(null))}
         title="Select Note Label"
       >
-        <SidebarList
-          title="Note Labels"
-          items={sidebarNotes}
-          activeId={activeNoteId}
-          Icon={FileText}
-          onSelect={(id) => {
-            dispatch(setActiveNote(id));
-            setActiveDrawer(null);
-          }}
-          onAdd={(name) =>
-            dispatch(addNote({ id: Date.now().toString(), title: name }))
-          }
-          onRename={(id, name) => dispatch(renameNote({ id, name }))}
-          onDelete={(id) => dispatch(deleteNote(id))}
-        />
+        <SidebarList title="Note Labels" />
       </MobileDrawer>
     </div>
   );

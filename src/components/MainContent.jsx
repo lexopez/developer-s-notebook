@@ -74,7 +74,7 @@ export default function MainContent({
         {currentNote ? (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <p className="lg:hidden text-slate-500 dark:text-slate-400 text-xs capitalize">
-              {currentFolder.name} folder /{" "}
+              {currentFolder ? `${currentFolder.name} folder / ` : ""}
               {currentNote.title.length > 30
                 ? currentNote.title.slice(0, 30) + "..."
                 : currentNote.title}
@@ -164,7 +164,7 @@ export default function MainContent({
                     Please create a new note by filling out the form below.
                   </span>
                 </p>
-                <div className="hidden lg:flex flex-col items-center justify-center text-center">
+                <div className="hidden lg:flex flex-col items-center justify-center">
                   {contentToDisplay.length > 0 ? (
                     <>
                       <Search

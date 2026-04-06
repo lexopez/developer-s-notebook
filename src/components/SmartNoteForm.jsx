@@ -105,37 +105,49 @@ export const SmartNoteForm = ({
         onSubmit={handleFormSubmit}
         className="w-full max-w-4xl space-y-4 animate-in fade-in duration-500 mx-auto"
       >
-        <div className="p-2 rounded-3xl bg-white dark:bg-[#0f1115] border border-cyan-100 dark:border-[#0f1115] space-y-4">
-          <div className="flex items-center justify-center gap-2 mb-2">
+        <div className="p-2 rounded-3xl bg-white dark:bg-[#0f1115] border border-cyan-100 dark:border-[#0f1115] space-y-2">
+          <div className="flex items-center justify-center gap-2 mb-2 p-5">
             <span className="text-xs font-bold uppercase tracking-tighter text-cyan-600">
               {activeCategory === "all" ? "Notes" : activeCategory}
             </span>
           </div>
 
-          {!activeFolderId && (
-            <input
-              name="folderName"
-              placeholder="No Folder Selected - Create a Folder Name..."
-              className="focus:ring-2 focus:ring-cyan-500/20 border border-transparent focus:border-cyan-500/50 w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
-              onChange={handleChange}
-              maxLength={50}
-              required
-            />
+          {!activeFolderId && !activeNoteId && (
+            <>
+              <span className="text-[10px] font-light text-slate-400 capitalize tracking-widest mb-2">
+                Folder (Optional) {activeNoteId}
+              </span>
+              <input
+                name="folderName"
+                placeholder="No Folder Selected - Create a Folder..."
+                className="focus:ring-2 focus:ring-cyan-500/20 border border-transparent focus:border-cyan-500/50 w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
+                onChange={handleChange}
+                maxLength={50}
+              />
+            </>
           )}
           {!activeNoteId && (
-            <input
-              name="noteTitle"
-              placeholder="No Note Selected - Give this Note a Label..."
-              className="focus:ring-2 focus:ring-cyan-500/20 border border-transparent focus:border-cyan-500/50 w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
-              onChange={handleChange}
-              maxLength={50}
-              required
-            />
+            <>
+              <span className="text-[10px] font-light text-slate-400 capitalize tracking-widest mb-2">
+                Note Label
+              </span>
+              <input
+                name="noteTitle"
+                placeholder="No Note Selected - Give this Note a Label..."
+                className="focus:ring-2 focus:ring-cyan-500/20 border border-transparent focus:border-cyan-500/50 w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
+                onChange={handleChange}
+                maxLength={50}
+                required
+              />
+            </>
           )}
 
           {/* Step 2: Dynamic Fields based on Category */}
           {activeCategory === "code snippets" && (
             <>
+              <span className="text-[10px] font-light text-slate-400 capitalize tracking-widest mb-2">
+                Code Snippet Name
+              </span>
               <input
                 name="label"
                 placeholder="Snippet Name (e.g. Tailwind Config)"
@@ -144,6 +156,9 @@ export const SmartNoteForm = ({
                 maxLength={100}
                 required
               />
+              <span className="text-[10px] font-light text-slate-400 capitalize tracking-widest mb-2">
+                Code
+              </span>
               <textarea
                 name="code"
                 placeholder="Paste your code here..."
@@ -157,6 +172,11 @@ export const SmartNoteForm = ({
           {(activeCategory === "side projects" ||
             activeCategory === "resources") && (
             <>
+              <span className="text-[10px] font-light text-slate-400 capitalize tracking-widest mb-2">
+                {activeCategory === "side projects"
+                  ? "Project Name"
+                  : "Resource Name"}
+              </span>
               <input
                 name="name"
                 placeholder="Name..."
@@ -165,6 +185,9 @@ export const SmartNoteForm = ({
                 maxLength={100}
                 required
               />
+              <span className="text-[10px] font-light text-slate-400 capitalize tracking-widest mb-2">
+                URL
+              </span>
               <input
                 name="url"
                 placeholder="URL (https://...)"
@@ -189,6 +212,9 @@ export const SmartNoteForm = ({
 
           {(activeCategory === "notes" || activeCategory === "all") && (
             <>
+              <span className="text-[10px] font-light text-slate-400 capitalize tracking-widest mb-2">
+                Note Title
+              </span>
               <input
                 name="title" // New Field
                 placeholder="Note Title (e.g., Thoughts on Refactoring)"
@@ -197,6 +223,9 @@ export const SmartNoteForm = ({
                 maxLength={100}
                 required
               />
+              <span className="text-[10px] font-light text-slate-400 capitalize tracking-widest mb-2">
+                Note Body
+              </span>
               <textarea
                 name="text"
                 placeholder="Write your thoughts..."
@@ -210,7 +239,7 @@ export const SmartNoteForm = ({
 
         <button
           type="submit"
-          className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-2xl transition-all transform active:scale-[0.98] cursor-pointer"
+          className="w-full py-4 mb-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-2xl transition-all transform active:scale-[0.98] cursor-pointer"
         >
           Create
         </button>

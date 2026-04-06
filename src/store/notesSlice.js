@@ -100,12 +100,16 @@ const initialState = {
   activeCategory: "all",
   // activeNoteId: "n1", // Track the selected note
   theme: "dark",
+  activeDrawer: null, // "folders" or "notes" for mobile view
 };
 
 const notesSlice = createSlice({
   name: "notes",
   initialState,
   reducers: {
+    setActiveDrawer: (state, action) => {
+      state.activeDrawer = action.payload;
+    },
     setActiveFolder: (state, action) => {
       state.activeFolderId = action.payload;
       // Reset active note to the first one in the new folder
@@ -116,6 +120,10 @@ const notesSlice = createSlice({
       state.activeCategory = action.payload;
     },
     setActiveNote: (state, action) => {
+      const note = state.notes.find((f) => f.id === action.payload);
+      if (note.folderId !== state.activeFolderId) {
+        state.activeFolderId = null;
+      }
       state.activeNoteId = action.payload;
     },
     toggleTheme: (state) => {
@@ -133,7 +141,7 @@ const notesSlice = createSlice({
     addNote: (state, action) => {
       const newNote = {
         id: action.payload.id || Date.now().toString(), // Allow passing ID or generate one
-        folderId: state.activeFolderId,
+        folderId: state.activeFolderId ?? null, // If no folder is active, note will be uncategorized
         title: action.payload.title,
         data: {
           "code snippets": [],
@@ -142,6 +150,7 @@ const notesSlice = createSlice({
           notes: [],
         },
       };
+      console.log("Adding note:", newNote);
       state.notes.push(newNote);
       state.activeNoteId = newNote.id; // Auto-select new note
     },
@@ -168,7 +177,7 @@ const notesSlice = createSlice({
     addContentToNote: (state, action) => {
       const { data } = action.payload;
 
-      let folderId = state.activeFolderId;
+      let folderId = state.activeFolderId ?? null;
 
       if (data.folderName) {
         folderId =
@@ -245,6 +254,7 @@ const notesSlice = createSlice({
 });
 
 export const {
+  setActiveDrawer,
   setActiveFolder,
   setActiveNote,
   setCategory,

@@ -1,15 +1,19 @@
 import { Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NoteLists from "./NoteLists";
-import { addFolder, addNote } from "../store/notesSlice";
+import { addFolder, addNote, moveNoteToFolder } from "../store/notesSlice";
 
-export const SidebarList = ({ title }) => {
+export const SidebarList = ({ title, isDropTarget = true }) => {
   const dispatch = useDispatch();
 
   const { notes, activeFolderId, folders } = useSelector(
     (state) => state.notes,
   );
+
+  const [isDragging1, setIsDragging1] = useState(false);
+  const [isDragging2, setIsDragging2] = useState(false);
+  const dragCounter = useRef(0);
 
   const [isAdding, setIsAdding] = useState(false);
   const [newValue, setNewValue] = useState("");
@@ -37,6 +41,22 @@ export const SidebarList = ({ title }) => {
       setNewValue("");
       setIsAdding(false);
     }
+  };
+
+  const handleDragStart = (e, noteId) => {
+    e.dataTransfer.setData("noteId", noteId);
+  };
+
+  const handleDropAddNoteToFolder = (e) => {
+    e.preventDefault();
+    const noteId = e.dataTransfer.getData("noteId");
+    dispatch(moveNoteToFolder({ noteId, folderId: activeFolderId }));
+  };
+
+  const handleDropRemoveNoteFromFolder = (e) => {
+    e.preventDefault();
+    const noteId = e.dataTransfer.getData("noteId");
+    dispatch(moveNoteToFolder({ noteId, folderId: null }));
   };
 
   return (
@@ -86,7 +106,33 @@ export const SidebarList = ({ title }) => {
                   <p className="text-[10px] font-light text-slate-400 capitalize tracking-widest truncate mb-2 pl-4">
                     current folder: {currentFolder?.name}
                   </p>
-                  <NoteLists items={notesWithFolder} title={title} />
+                  <div
+                    className={`space-y-1 ${isDragging1 ? "border border-slate-100 dark:border-slate-800" : ""}`}
+                    onDragOver={(e) => {
+                      isDropTarget && e.preventDefault();
+                    }}
+                    onDragEnter={() => {
+                      setIsDragging1(true);
+                      dragCounter.current++;
+                    }}
+                    onDragLeave={() => {
+                      dragCounter.current--;
+                      if (dragCounter.current === 0) {
+                        setIsDragging1(false);
+                      }
+                    }}
+                  >
+                    <NoteLists
+                      items={notesWithFolder}
+                      title={title}
+                      onDragStart={(e, id) => handleDragStart(e, id)}
+                      onDrop={(e) => {
+                        handleDropAddNoteToFolder(e);
+                        setIsDragging1(false);
+                        dragCounter.current = 0;
+                      }}
+                    />
+                  </div>
                 </>
               )}
 
@@ -100,7 +146,33 @@ export const SidebarList = ({ title }) => {
                   <p className="text-[10px] font-light text-slate-400 capitalize tracking-widest truncate mb-2 pl-4">
                     Without Folder
                   </p>
-                  <NoteLists items={notesWithoutFolder} title={title} />
+                  <div
+                    className={`space-y-1 ${isDragging2 ? "border border-slate-100 dark:border-slate-800" : ""}`}
+                    onDragOver={(e) => {
+                      isDropTarget && e.preventDefault();
+                    }}
+                    onDragEnter={() => {
+                      setIsDragging2(true);
+                      dragCounter.current++;
+                    }}
+                    onDragLeave={() => {
+                      dragCounter.current--;
+                      if (dragCounter.current === 0) {
+                        setIsDragging2(false);
+                      }
+                    }}
+                  >
+                    <NoteLists
+                      items={notesWithoutFolder}
+                      title={title}
+                      onDragStart={(e, id) => handleDragStart(e, id)}
+                      onDrop={(e) => {
+                        handleDropRemoveNoteFromFolder(e);
+                        setIsDragging2(false);
+                        dragCounter.current = 0;
+                      }}
+                    />
+                  </div>
                 </>
               )}
 

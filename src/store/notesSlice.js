@@ -140,7 +140,9 @@ const notesSlice = createSlice({
     },
     addNote: (state, action) => {
       const newNote = {
-        id: action.payload.id || Date.now().toString(), // Allow passing ID or generate one
+        id:
+          action.payload.id + Math.random().toString(36).substring(2, 7) ||
+          Date.now().toString(), // Allow passing ID or generate one
         folderId: state.activeFolderId ?? null, // If no folder is active, note will be uncategorized
         title: action.payload.title,
         data: {
@@ -250,6 +252,13 @@ const notesSlice = createSlice({
         };
       }
     },
+    moveNoteToFolder: (state, action) => {
+      const { noteId, folderId } = action.payload;
+      const note = state.notes.find((n) => n.id === noteId);
+      if (note) {
+        note.folderId = folderId;
+      }
+    },
   },
 });
 
@@ -268,5 +277,6 @@ export const {
   addContentToNote,
   deleteContent,
   updateContent,
+  moveNoteToFolder,
 } = notesSlice.actions;
 export default notesSlice.reducer;

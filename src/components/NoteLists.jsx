@@ -11,9 +11,9 @@ import {
   setActiveFolder,
   setActiveNote,
 } from "../store/notesSlice";
-import { FileText, Folder } from "lucide-react";
+import { FileText, Folder, GripVertical } from "lucide-react";
 
-export default function NoteLists({ items, title }) {
+export default function NoteLists({ items, title, onDragStart, onDrop }) {
   const dispatch = useDispatch();
   const { activeNoteId, activeFolderId } = useSelector((state) => state.notes);
 
@@ -52,7 +52,13 @@ export default function NoteLists({ items, title }) {
   return (
     <>
       {items.map((item) => (
-        <div key={item.id} className="group relative " draggable>
+        <div
+          key={item.id}
+          className="group relative "
+          draggable={title === "Note Labels"}
+          onDragStart={(e) => onDragStart(e, item.id)}
+          onDrop={(e) => onDrop(e, item.id)}
+        >
           {editingId === item.id ? (
             <>
               <input
@@ -74,12 +80,18 @@ export default function NoteLists({ items, title }) {
             <div className="flex items-center">
               <button
                 onClick={() => handleSelect(item.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all ${
+                className={`w-full flex items-center gap-3 p-3 transition-all ${
                   activeId === item.id
                     ? "bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 font-semibold"
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
                 }`}
               >
+                {title === "Note Labels" && (
+                  <GripVertical
+                    size={16}
+                    className="text-slate-400 cursor-grab active:cursor-grabbing dark:active:bg-slate-800/50 rounded"
+                  />
+                )}
                 <Icon size={20} className="shrink-0" />
                 <span className="text-sm truncate pr-4 capitalize">
                   {item.title || item.name}

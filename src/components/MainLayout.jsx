@@ -1,9 +1,5 @@
 import { FileText, Folder, Plus } from "lucide-react";
-import {
-  setActiveFolder,
-  setActiveNote,
-  setActiveDrawer,
-} from "../store/notesSlice";
+import { setActiveDrawer } from "../store/notesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { SidebarList } from "./SidebarList";
 import MainContent from "./MainContent";
@@ -13,8 +9,9 @@ import MobileDrawer from "./MobileDrawer";
 
 export const MainLayout = () => {
   const dispatch = useDispatch();
-  const { folders, notes, activeFolderId, activeNoteId, activeDrawer } =
-    useSelector((state) => state.notes);
+  const { folders, notes, activeNoteId, activeDrawer } = useSelector(
+    (state) => state.notes,
+  );
 
   const currentNote = notes.find((n) => n.id === activeNoteId);
 
@@ -29,7 +26,7 @@ export const MainLayout = () => {
 
       {/* LEFT SIDEBAR: NOTES (Hidden on mobile) */}
       <aside className="hidden lg:flex w-[18%] flex-col p-4">
-        {notes.length !== 0 && <SidebarList title="Note Labels" />}
+        {notes.length > 0 && <SidebarList title="Note Labels" />}
       </aside>
 
       {/* MAIN EDITOR (Full width on mobile) */}

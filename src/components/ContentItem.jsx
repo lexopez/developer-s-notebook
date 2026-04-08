@@ -40,8 +40,6 @@ export const ContentItem = ({ item, category }) => {
         data: updatedItem,
       }),
     );
-
-    // dispatch(deleteContent({ id: item.id, category }));
   };
 
   const handleSaveEdit = () => {

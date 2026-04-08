@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { addContentToNote } from "../store/notesSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { Favicon } from "./Favicon";
+import { updateNoteContent } from "../store/newStore";
 
 export const SmartNoteForm = ({
   activeCategory,
@@ -10,6 +10,7 @@ export const SmartNoteForm = ({
   onSuccess,
 }) => {
   const dispatch = useDispatch();
+  const { notes } = useSelector((state) => state.notes);
 
   // Local state for all possible fields
   const [formData, setFormData] = useState({
@@ -89,10 +90,22 @@ export const SmartNoteForm = ({
       itemData[field] = formData[field];
     });
 
+    const activeNote = notes.find((n) => n.id === activeNoteId);
+
+    // 1. Create a deep copy of the current data
+    const updatedData = {
+      ...activeNote.data,
+      [cat]: [
+        ...(activeNote.data[cat] || []),
+        { ...itemData, id: crypto.randomUUID() },
+      ],
+    };
+
     // Dispatch
     dispatch(
-      addContentToNote({
-        data: itemData,
+      updateNoteContent({
+        id: activeNoteId,
+        data: updatedData,
       }),
     );
 

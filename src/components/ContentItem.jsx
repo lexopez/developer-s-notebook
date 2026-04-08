@@ -1,14 +1,18 @@
 import { Maximize2, X, Edit3, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux"; // Assuming you have delete/update actions
-import { deleteContent, updateContent } from "../store/notesSlice";
+import { useDispatch, useSelector } from "react-redux"; // Assuming you have delete/update actions
 import { CodeBlock } from "./CodeBlock";
 import { Favicon } from "./Favicon";
 import DeleteButton from "./DeleteButton";
 import EditButton from "./EditButton";
+import { updateNoteContent } from "../store/newStore";
 
 export const ContentItem = ({ item, category }) => {
   const dispatch = useDispatch();
+  const { notes, activeNoteId, activeCategory } = useSelector(
+    (state) => state.notes,
+  );
+
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -19,7 +23,25 @@ export const ContentItem = ({ item, category }) => {
   const [isEditingSimple, setIsEditingSimple] = useState(false);
 
   const handleDelete = () => {
-    dispatch(deleteContent({ id: item.id, category }));
+    const cat = activeCategory === "all" ? "notes" : activeCategory;
+    const activeNote = notes.find((n) => n.id === activeNoteId);
+    if (!activeNote) return;
+
+    const newData = activeNote.data[cat].filter((i) => i.id !== item.id);
+
+    const updatedItem = {
+      ...activeNote.data,
+      [cat]: newData,
+    };
+
+    dispatch(
+      updateNoteContent({
+        id: activeNoteId,
+        data: updatedItem,
+      }),
+    );
+
+    // dispatch(deleteContent({ id: item.id, category }));
   };
 
   const handleSaveEdit = () => {
@@ -55,11 +77,23 @@ export const ContentItem = ({ item, category }) => {
       return;
     }
 
+    const cat = activeCategory === "all" ? "notes" : activeCategory;
+    const activeNote = notes.find((n) => n.id === activeNoteId);
+    if (!activeNote) return;
+
+    const newData = activeNote.data[cat].map((i) =>
+      i.id === item.id ? { ...i, ...tempData } : i,
+    );
+
+    const updatedItem = {
+      ...activeNote.data,
+      [cat]: newData,
+    };
+
     dispatch(
-      updateContent({
-        id: item.id,
-        category,
-        newData: tempData,
+      updateNoteContent({
+        id: activeNoteId,
+        data: updatedItem,
       }),
     );
 

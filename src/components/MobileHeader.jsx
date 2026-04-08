@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
-import { toggleTheme } from "../store/notesSlice";
 import { Moon, Sun } from "lucide-react";
 import { useEffect } from "react";
+import { toggleTheme } from "../store/newStore";
 
 export default function MobileHeader() {
   const dispatch = useDispatch();

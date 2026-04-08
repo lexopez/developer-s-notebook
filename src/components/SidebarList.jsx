@@ -2,7 +2,7 @@ import { Plus, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NoteLists from "./NoteLists";
-import { addFolder, addNote, moveNoteToFolder } from "../store/newStore";
+import { addFolder, addNote, moveNoteToFolder } from "../store/notesSlice";
 
 export const SidebarList = ({ title, isDropTarget = true }) => {
   const dispatch = useDispatch();
@@ -23,23 +23,21 @@ export const SidebarList = ({ title, isDropTarget = true }) => {
   let notesWithoutFolder = [];
   let currentFolder = null;
   if (title === "Note Labels") {
-    const sidebarNotes = notes.filter((n) => n.folder_id === activeFolderId);
+    const sidebarNotes = notes.filter((n) => n.folderId === activeFolderId);
     notesWithFolder =
       sidebarNotes.length > 0
-        ? sidebarNotes.filter((i) => i.folder_id !== null)
+        ? sidebarNotes.filter((i) => i.folderId !== null)
         : [];
     notesWithoutFolder =
-      notes.length > 0 ? notes.filter((i) => i.folder_id === null) : [];
+      notes.length > 0 ? notes.filter((i) => i.folderId === null) : [];
     currentFolder = folders.find((i) => i.id === activeFolderId);
   }
 
   const handleAdd = (e) => {
     if (e.key === "Enter" && newValue.trim() && newValue.length <= 50) {
-      if (title === "Note Labels") {
-        dispatch(addNote({ title: newValue, folderId: activeFolderId }));
-      } else {
-        dispatch(addFolder(newValue));
-      }
+      title === "Note Labels"
+        ? dispatch(addNote({ id: Date.now().toString(), title: newValue }))
+        : dispatch(addFolder({ id: Date.now().toString(), name: newValue }));
       setNewValue("");
       setIsAdding(false);
     }

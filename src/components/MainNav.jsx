@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setCategory, toggleTheme } from "../store/newStore";
+import { setCategory, toggleTheme } from "../store/notesSlice";
 import {
   BookOpen,
   Code,

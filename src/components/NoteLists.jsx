@@ -2,6 +2,7 @@ import { useState } from "react";
 import EditButton from "./EditButton";
 import DeleteButton from "./DeleteButton";
 import { useDispatch, useSelector } from "react-redux";
+import { FileText, Folder, GripVertical } from "lucide-react";
 import {
   deleteFolder,
   deleteNote,
@@ -10,8 +11,7 @@ import {
   setActiveDrawer,
   setActiveFolder,
   setActiveNote,
-} from "../store/notesSlice";
-import { FileText, Folder, GripVertical } from "lucide-react";
+} from "../store/newStore";
 
 export default function NoteLists({ items, title, onDragStart, onDrop }) {
   const dispatch = useDispatch();
@@ -37,13 +37,14 @@ export default function NoteLists({ items, title, onDragStart, onDrop }) {
       dispatch(deleteNote(id));
     } else {
       dispatch(deleteFolder(id));
+      dispatch(setActiveFolder(null));
     }
   };
 
   const handleRename = (id, e) => {
     if (e.key === "Enter" && editValue.trim() && editValue.length <= 50) {
       title === "Note Labels"
-        ? dispatch(renameNote({ id, name: editValue }))
+        ? dispatch(renameNote({ id, title: editValue }))
         : dispatch(renameFolder({ id, name: editValue }));
       setEditingId(null);
     }

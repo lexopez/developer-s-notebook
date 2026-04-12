@@ -15,3 +15,47 @@ body {
     scrollbar-width: none;
   }
 }
+
+/* Custom Scrollbar Styles */
+@layer base {
+  /* Chrome, Edge, and Safari */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-700 rounded-full border-2 border-transparent bg-clip-content;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-cyan-500;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme("colors.slate.700") transparent;
+  }
+}
+
+.custom-scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.custom-scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Show only on hover */
+.custom-scrollbar-show-on-hover:hover {
+  scrollbar-width: thin;
+}
+.custom-scrollbar-show-on-hover:hover::-webkit-scrollbar {
+  display: block;
+}

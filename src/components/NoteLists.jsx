@@ -4,18 +4,34 @@ import DeleteButton from "./DeleteButton";
 import { useDispatch, useSelector } from "react-redux";
 import { FileText, Folder, GripVertical } from "lucide-react";
 import {
-  deleteFolder,
-  deleteNote,
-  renameFolder,
-  renameNote,
   setActiveDrawer,
   setActiveFolder,
   setActiveNote,
 } from "../store/newStore";
+import { useDeleteNote } from "../hooks/notes/useDeleteNote";
+import { useDeleteFolder } from "../hooks/folders/useDeleteFolder";
+import { useRenameNote } from "../hooks/notes/useRenameNote";
+import { useRenameFolder } from "../hooks/folders/useRenameFolder";
 
 export default function NoteLists({ items, title, onDragStart, onDrop }) {
   const dispatch = useDispatch();
   const { activeNoteId, activeFolderId } = useSelector((state) => state.notes);
+
+  const {
+    removeNote,
+    isPending: isDeletingNote,
+    variables: noteVars,
+  } = useDeleteNote();
+  const {
+    removeFolder,
+    isPending: isDeletingFolder,
+    variables: folderVars,
+  } = useDeleteFolder();
+  const { changeNoteName } = useRenameNote();
+  const { changeFolderName } = useRenameFolder();
+
+  // const isDeletingThisNote = isDeletingNote && variables === note.id;
+  // const isDeletingThisFolder = isDeletingFolder && variables === note.id;
 
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
@@ -28,15 +44,17 @@ export default function NoteLists({ items, title, onDragStart, onDrop }) {
       dispatch(setActiveNote(id));
     } else {
       dispatch(setActiveFolder(id));
+      dispatch(setActiveNote(null));
     }
     dispatch(setActiveDrawer(null));
   };
 
   const handleDelete = (id) => {
     if (title === "Note Labels") {
-      dispatch(deleteNote(id));
+      removeNote(id);
+      if (activeNoteId === id) dispatch(setActiveNote(null));
     } else {
-      dispatch(deleteFolder(id));
+      removeFolder(id);
       dispatch(setActiveFolder(null));
     }
   };
@@ -44,8 +62,8 @@ export default function NoteLists({ items, title, onDragStart, onDrop }) {
   const handleRename = (id, e) => {
     if (e.key === "Enter" && editValue.trim() && editValue.length <= 50) {
       title === "Note Labels"
-        ? dispatch(renameNote({ id, title: editValue }))
-        : dispatch(renameFolder({ id, name: editValue }));
+        ? changeNoteName({ id, title: editValue })
+        : changeFolderName({ id, name: editValue });
       setEditingId(null);
     }
   };
@@ -90,7 +108,7 @@ export default function NoteLists({ items, title, onDragStart, onDrop }) {
                 {title === "Note Labels" && (
                   <GripVertical
                     size={16}
-                    className="text-slate-400 cursor-grab active:cursor-grabbing dark:active:bg-slate-800/50 rounded"
+                    className="shrink-0 text-slate-400 cursor-grab active:cursor-grabbing dark:active:bg-slate-800/50 rounded"
                   />
                 )}
                 <Icon size={20} className="shrink-0" />
@@ -105,7 +123,13 @@ export default function NoteLists({ items, title, onDragStart, onDrop }) {
                     setEditValue(item.title || item.name);
                   }}
                 />
-                <DeleteButton handleDelete={() => handleDelete(item.id)} />
+                <DeleteButton
+                  handleDelete={() => handleDelete(item.id)}
+                  isDeleting={
+                    (isDeletingFolder || isDeletingNote) &&
+                    (noteVars?.id === item.id || folderVars?.id === item.id)
+                  }
+                />
               </div>
             </div>
           )}

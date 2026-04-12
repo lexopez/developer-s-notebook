@@ -1,16 +1,21 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Favicon } from "./Favicon";
-import { updateNoteContent } from "../store/newStore";
+import { useUpdateNoteData } from "../hooks/notes/useUpdateNoteData";
+import { useNotes } from "../hooks/notes/useNotes";
+import { useAddFolder } from "../hooks/folders/useAddFolder";
+import { useAddNote } from "../hooks/notes/useAddNote";
+import toast from "react-hot-toast";
 
-export const SmartNoteForm = ({
-  activeCategory,
-  activeNoteId,
-  activeFolderId,
-  onSuccess,
-}) => {
-  const dispatch = useDispatch();
-  const { notes } = useSelector((state) => state.notes);
+export const SmartNoteForm = ({ closeModal }) => {
+  const { activeCategory, activeNoteId, activeFolderId } = useSelector(
+    (state) => state.notes,
+  );
+
+  const { notes } = useNotes();
+  const { editNoteData, isPending: isUpdatingNoteData } = useUpdateNoteData();
+  const { createFolder, isPending: isCreatingFolder } = useAddFolder();
+  const { createNote, isPending: isCreatingNote } = useAddNote();
 
   // Local state for all possible fields
   const [formData, setFormData] = useState({
@@ -27,30 +32,13 @@ export const SmartNoteForm = ({
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
 
     const cat = activeCategory === "all" ? "notes" : activeCategory;
     const itemData = {};
 
     const isEmpty = (val) => !val || !val.trim();
-
-    // Optional fields
-    if (
-      !activeFolderId &&
-      !isEmpty(formData.folderName) &&
-      formData.folderName.trim().length <= 50
-    ) {
-      itemData.folderName = formData.folderName;
-    }
-
-    if (
-      !activeNoteId &&
-      !isEmpty(formData.noteTitle) &&
-      formData.noteTitle.trim().length <= 50
-    ) {
-      itemData.noteTitle = formData.noteTitle;
-    }
 
     // Category-based config
     const categoryConfig = {
@@ -90,26 +78,61 @@ export const SmartNoteForm = ({
       itemData[field] = formData[field];
     });
 
+    // let noteData;
     const activeNote = notes.find((n) => n.id === activeNoteId);
 
-    // 1. Create a deep copy of the current data
-    const updatedData = {
-      ...activeNote.data,
-      [cat]: [
-        ...(activeNote.data[cat] || []),
-        { ...itemData, id: crypto.randomUUID() },
-      ],
-    };
+    // Optional fields
+    if (
+      !activeFolderId &&
+      !activeNoteId &&
+      !isEmpty(formData.folderName) &&
+      formData.folderName.trim().length <= 50
+    ) {
+      createFolder({
+        folderName: formData.folderName,
+        noteTitle: formData.noteTitle,
+        itemData: { [cat]: [{ ...itemData, id: crypto.randomUUID() }] },
+      });
+      closeModal?.();
+    }
 
-    // Dispatch
-    dispatch(
-      updateNoteContent({
-        id: activeNoteId,
-        data: updatedData,
-      }),
-    );
+    if (
+      !activeNoteId &&
+      activeFolderId &&
+      !isEmpty(formData.noteTitle) &&
+      formData.noteTitle.trim().length <= 50
+    ) {
+      createNote({
+        title: formData.noteTitle,
+        folderId: activeFolderId,
+        itemData: { [cat]: [{ ...itemData, id: crypto.randomUUID() }] },
+      });
+      closeModal?.();
+    }
 
-    onSuccess?.();
+    if (activeNoteId) {
+      // 1. Create a deep copy of the current data
+      const updatedData = {
+        ...activeNote.data,
+        [cat]: [
+          ...(activeNote.data[cat] || []),
+          { ...itemData, id: crypto.randomUUID() },
+        ],
+      };
+
+      editNoteData(
+        {
+          id: activeNoteId,
+          data: updatedData,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Note created!");
+            closeModal?.();
+          },
+        },
+      );
+    }
   };
 
   return (
@@ -253,8 +276,13 @@ export const SmartNoteForm = ({
         <button
           type="submit"
           className="w-full py-4 mb-4 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-2xl transition-all transform active:scale-[0.98] cursor-pointer"
+          disabled={isCreatingNote || isCreatingFolder || isUpdatingNoteData}
         >
-          Create
+          {isCreatingNote || isCreatingFolder || isUpdatingNoteData ? (
+            <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin m-auto" />
+          ) : (
+            "Create"
+          )}
         </button>
       </form>
     </div>

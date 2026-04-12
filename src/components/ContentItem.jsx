@@ -1,19 +1,20 @@
 import { Maximize2, X, Edit3, Eye } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux"; // Assuming you have delete/update actions
+import { useState } from "react";
+import { useSelector } from "react-redux"; // Assuming you have delete/update actions
 import { CodeBlock } from "./CodeBlock";
 import { Favicon } from "./Favicon";
 import DeleteButton from "./DeleteButton";
 import EditButton from "./EditButton";
-import { updateNoteContent } from "../store/newStore";
+import { useNotes } from "../hooks/notes/useNotes";
+import { useUpdateNoteData } from "../hooks/notes/useUpdateNoteData";
+import toast from "react-hot-toast";
 
 export const ContentItem = ({ item, category }) => {
-  const dispatch = useDispatch();
-  const { notes, activeNoteId, activeCategory } = useSelector(
-    (state) => state.notes,
-  );
+  const { activeNoteId } = useSelector((state) => state.notes);
 
-  const [copied, setCopied] = useState(false);
+  const { notes } = useNotes();
+  const { editNoteData, isPending: isUpdatingNoteData } = useUpdateNoteData();
+
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Edit State
@@ -23,22 +24,22 @@ export const ContentItem = ({ item, category }) => {
   const [isEditingSimple, setIsEditingSimple] = useState(false);
 
   const handleDelete = () => {
-    const cat = activeCategory === "all" ? "notes" : activeCategory;
     const activeNote = notes.find((n) => n.id === activeNoteId);
     if (!activeNote) return;
 
-    const newData = activeNote.data[cat].filter((i) => i.id !== item.id);
+    const newData = activeNote.data[category].filter((i) => i.id !== item.id);
 
     const updatedItem = {
       ...activeNote.data,
-      [cat]: newData,
+      [category]: newData,
     };
 
-    dispatch(
-      updateNoteContent({
+    editNoteData(
+      {
         id: activeNoteId,
         data: updatedItem,
-      }),
+      },
+      { onSuccess: () => toast.success("Note deleted!") },
     );
   };
 
@@ -75,36 +76,33 @@ export const ContentItem = ({ item, category }) => {
       return;
     }
 
-    const cat = activeCategory === "all" ? "notes" : activeCategory;
+    // const cat = activeCategory === "all" ? "notes" : activeCategory;
     const activeNote = notes.find((n) => n.id === activeNoteId);
     if (!activeNote) return;
 
-    const newData = activeNote.data[cat].map((i) =>
+    const newData = activeNote.data[category].map((i) =>
       i.id === item.id ? { ...i, ...tempData } : i,
     );
 
     const updatedItem = {
       ...activeNote.data,
-      [cat]: newData,
+      [category]: newData,
     };
 
-    dispatch(
-      updateNoteContent({
+    editNoteData(
+      {
         id: activeNoteId,
         data: updatedItem,
-      }),
+      },
+      {
+        onSuccess: () => {
+          toast.success("Note updated!");
+          setEditMode("view");
+          setIsEditingSimple(false);
+        },
+      },
     );
-
-    setEditMode("view");
-    setIsEditingSimple(false);
   };
-
-  useEffect(() => {
-    if (copied) {
-      const timeout = setTimeout(() => setCopied(false), 1500);
-      return () => clearTimeout(timeout);
-    }
-  }, [copied]);
 
   const isExpandable = category === "code snippets" || category === "notes";
 
@@ -127,7 +125,10 @@ export const ContentItem = ({ item, category }) => {
               }
             }}
           />
-          <DeleteButton handleDelete={handleDelete} />
+          <DeleteButton
+            handleDelete={handleDelete}
+            isDeleting={isUpdatingNoteData}
+          />
         </div>
 
         <div className="flex justify-between items-start gap-2">
@@ -152,7 +153,6 @@ export const ContentItem = ({ item, category }) => {
               onClick={(e) => e.stopPropagation()}
               className="hover:bg-slate-200 rounded-lg transition-colors p-1"
             >
-              {/* <Rocket size={14} /> */}
               <Favicon url={item.url} />
             </a>
           )}
@@ -182,10 +182,14 @@ export const ContentItem = ({ item, category }) => {
                     handleSaveEdit();
                   }}
                   className="shrink-0 px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                  disabled={isUpdatingNoteData}
                 >
-                  Save
+                  {isUpdatingNoteData ? (
+                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin m-auto" />
+                  ) : (
+                    "Save"
+                  )}
                 </button>
-                <DeleteButton handleDelete={handleDelete} />
                 <button
                   onClick={() => {
                     setIsEditingSimple(false);
@@ -271,7 +275,12 @@ export const ContentItem = ({ item, category }) => {
                 >
                   <Edit3 size={14} /> Edit
                 </button>
-                <DeleteButton handleDelete={handleDelete} />
+                {editMode !== "edit" && (
+                  <DeleteButton
+                    handleDelete={handleDelete}
+                    isDeleting={isUpdatingNoteData}
+                  />
+                )}
               </div>
 
               <div className="flex items-center gap-2">
@@ -279,8 +288,13 @@ export const ContentItem = ({ item, category }) => {
                   <button
                     onClick={handleSaveEdit}
                     className="shrink-0 px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold rounded-xl transition-all cursor-pointer"
+                    disabled={isUpdatingNoteData}
                   >
-                    Save
+                    {isUpdatingNoteData ? (
+                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin m-auto" />
+                    ) : (
+                      "Save"
+                    )}
                   </button>
                 )}
                 <button

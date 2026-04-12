@@ -2,14 +2,34 @@ import { Plus, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NoteLists from "./NoteLists";
-import { addFolder, addNote, moveNoteToFolder } from "../store/newStore";
+import { useAddFolder } from "../hooks/folders/useAddFolder";
+import { useAddNote } from "../hooks/notes/useAddNote";
+import { useUpdateNoteFolderId } from "../hooks/notes/useUpdateNoteFolderId";
+import { useFolders } from "../hooks/folders/useFolders";
+import { useNotes } from "../hooks/notes/useNotes";
+import toast from "react-hot-toast";
 
 export const SidebarList = ({ title, isDropTarget = true }) => {
-  const dispatch = useDispatch();
+  const {
+    createFolder,
+    error: createFolderError,
+    isPending: isCreatingFolder,
+  } = useAddFolder();
+  const {
+    createNote,
+    error: createNoteError,
+    isPending: isCreatingnote,
+  } = useAddNote();
+  const {
+    folderizeUnfolderizeNote,
+    error: updateNoteError,
+    isPending: isUpdatingNote,
+  } = useUpdateNoteFolderId();
 
-  const { notes, activeFolderId, folders } = useSelector(
-    (state) => state.notes,
-  );
+  const { folders, isLoading: isFetchingFolders } = useFolders();
+  const { notes, isLoading: isFetchingNotes } = useNotes();
+
+  const { activeFolderId } = useSelector((state) => state.notes);
 
   const [isDragging1, setIsDragging1] = useState(false);
   const [isDragging2, setIsDragging2] = useState(false);
@@ -23,22 +43,22 @@ export const SidebarList = ({ title, isDropTarget = true }) => {
   let notesWithoutFolder = [];
   let currentFolder = null;
   if (title === "Note Labels") {
-    const sidebarNotes = notes.filter((n) => n.folder_id === activeFolderId);
+    const sidebarNotes = notes?.filter((n) => n.folder_id === activeFolderId);
     notesWithFolder =
-      sidebarNotes.length > 0
+      sidebarNotes?.length > 0
         ? sidebarNotes.filter((i) => i.folder_id !== null)
         : [];
     notesWithoutFolder =
-      notes.length > 0 ? notes.filter((i) => i.folder_id === null) : [];
-    currentFolder = folders.find((i) => i.id === activeFolderId);
+      notes?.length > 0 ? notes?.filter((i) => i.folder_id === null) : [];
+    currentFolder = folders?.find((i) => i.id === activeFolderId);
   }
 
   const handleAdd = (e) => {
     if (e.key === "Enter" && newValue.trim() && newValue.length <= 50) {
       if (title === "Note Labels") {
-        dispatch(addNote({ title: newValue, folderId: activeFolderId }));
+        createNote({ title: newValue, folderId: activeFolderId });
       } else {
-        dispatch(addFolder(newValue));
+        createFolder({ folderName: newValue });
       }
       setNewValue("");
       setIsAdding(false);
@@ -52,13 +72,13 @@ export const SidebarList = ({ title, isDropTarget = true }) => {
   const handleDropAddNoteToFolder = (e) => {
     e.preventDefault();
     const noteId = e.dataTransfer.getData("noteId");
-    dispatch(moveNoteToFolder({ noteId, folderId: activeFolderId }));
+    folderizeUnfolderizeNote({ noteId, folderId: activeFolderId });
   };
 
   const handleDropRemoveNoteFromFolder = (e) => {
     e.preventDefault();
     const noteId = e.dataTransfer.getData("noteId");
-    dispatch(moveNoteToFolder({ noteId, folderId: null }));
+    folderizeUnfolderizeNote({ noteId, folderId: null });
   };
 
   return (
@@ -76,134 +96,138 @@ export const SidebarList = ({ title, isDropTarget = true }) => {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 h-full">
-          {isAdding && (
-            <>
-              <input
-                autoFocus
-                maxLength={50}
-                className="w-full bg-slate-200 dark:text-slate-200 dark:bg-slate-800/50 text-sm p-2 rounded-lg outline-none border-b-2 border-cyan-500 mb-2"
-                placeholder={
-                  title === "Note Labels"
-                    ? "New note label..."
-                    : "New folder..."
-                }
-                value={newValue}
-                onChange={(e) => setNewValue(e.target.value)}
-                onKeyDown={handleAdd}
-                onBlur={() => setIsAdding(false)}
-              />
-              {newValue.length >= 40 && (
-                <p className="text-[9px] text-orange-500 mt-1 px-1">
-                  {50 - newValue.length} characters remaining
-                </p>
-              )}
-            </>
-          )}
-          {title === "Note Labels" && (
-            <>
-              {/* Notes with Folder */}
-
-              <div
-                className={`space-y-1 ${isDragging1 ? "border border-slate-100 dark:border-slate-800" : ""}`}
-                onDragOver={(e) => {
-                  isDropTarget && e.preventDefault();
-                }}
-                onDragEnter={() => {
-                  setIsDragging1(true);
-                  dragCounter.current++;
-                }}
-                onDragLeave={() => {
-                  dragCounter.current--;
-                  if (dragCounter.current === 0) {
-                    setIsDragging1(false);
+        {!isFetchingFolders && !isFetchingNotes && (
+          <div className="flex-1 overflow-y-auto no-scrollbar space-y-1 h-full">
+            {isAdding && (
+              <>
+                <input
+                  autoFocus
+                  maxLength={50}
+                  className="w-full bg-slate-200 dark:text-slate-200 dark:bg-slate-800/50 text-sm p-2 rounded-lg outline-none border-b-2 border-cyan-500 mb-2"
+                  placeholder={
+                    title === "Note Labels"
+                      ? "New note label..."
+                      : "New folder..."
                   }
-                }}
-              >
-                {currentFolder && (
-                  <p className="text-[10px] font-light text-slate-400 capitalize tracking-widest truncate mb-2 pl-4">
-                    current folder:{" "}
-                    <span className="font-bold">{currentFolder?.name}</span>
+                  value={newValue}
+                  onChange={(e) => setNewValue(e.target.value)}
+                  onKeyDown={handleAdd}
+                  onBlur={() => setIsAdding(false)}
+                />
+                {newValue.length >= 40 && (
+                  <p className="text-[9px] text-orange-500 mt-1 px-1">
+                    {50 - newValue.length} characters remaining
                   </p>
                 )}
-                {notesWithFolder.length > 0 && (
-                  <NoteLists
-                    items={notesWithFolder}
-                    title={title}
-                    onDragStart={(e, id) => handleDragStart(e, id)}
-                    onDrop={(e) => {
-                      handleDropAddNoteToFolder(e);
-                      setIsDragging1(false);
-                      dragCounter.current = 0;
-                    }}
-                  />
-                )}
-                {notesWithFolder.length === 0 && activeFolderId && (
-                  <p className="text-slate-400 text-sm font-medium px-4">
-                    Create new Note label using the plus button or Drag and drop
-                    here existing notes from unfolderized Note labels to add
-                    them to th current folder.
-                  </p>
-                )}
-              </div>
+              </>
+            )}
+            {title === "Note Labels" && (
+              <>
+                {/* Notes with Folder */}
 
-              {notesWithoutFolder.length > 0 && activeFolderId && (
-                <div className="border-b border-slate-200 my-5" />
-              )}
-
-              {/* Notes without Folder */}
-              {notesWithoutFolder.length > 0 && (
                 <div
-                  className={`space-y-1 ${isDragging2 ? "border border-slate-100 dark:border-slate-800" : ""}`}
+                  className={`space-y-1 ${isDragging1 ? "border border-slate-100 dark:border-slate-800" : ""}`}
                   onDragOver={(e) => {
                     isDropTarget && e.preventDefault();
                   }}
                   onDragEnter={() => {
-                    setIsDragging2(true);
+                    setIsDragging1(true);
                     dragCounter.current++;
                   }}
                   onDragLeave={() => {
                     dragCounter.current--;
                     if (dragCounter.current === 0) {
-                      setIsDragging2(false);
+                      setIsDragging1(false);
                     }
                   }}
                 >
-                  <p className="text-[10px] font-light text-slate-400 capitalize tracking-widest truncate mb-2 pl-4">
-                    Unfolderized Notes
-                  </p>
-                  <NoteLists
-                    items={notesWithoutFolder}
-                    title={title}
-                    onDragStart={(e, id) => handleDragStart(e, id)}
-                    onDrop={(e) => {
-                      handleDropRemoveNoteFromFolder(e);
-                      setIsDragging2(false);
-                      dragCounter.current = 0;
-                    }}
-                  />
+                  {currentFolder && (
+                    <p className="text-[10px] font-light text-slate-400 capitalize tracking-widest truncate mb-2 pl-4">
+                      current folder:{" "}
+                      <span className="font-bold text-cyan-600">
+                        {currentFolder?.name}
+                      </span>
+                    </p>
+                  )}
+                  {notesWithFolder.length > 0 && (
+                    <NoteLists
+                      items={notesWithFolder}
+                      title={title}
+                      onDragStart={(e, id) => handleDragStart(e, id)}
+                      onDrop={(e) => {
+                        handleDropAddNoteToFolder(e);
+                        setIsDragging1(false);
+                        dragCounter.current = 0;
+                      }}
+                    />
+                  )}
+                  {notesWithFolder.length === 0 && activeFolderId && (
+                    <p className="text-slate-400 text-sm font-medium px-4">
+                      Create new Note label using the plus button or Drag and
+                      drop here existing notes from unfolderized Note labels to
+                      add them to th current folder.
+                    </p>
+                  )}
                 </div>
-              )}
 
-              {notesWithoutFolder.length === 0 && !activeFolderId && (
-                <p className=" text-slate-400 text-sm font-medium text-center mt-4">
-                  No {title} yet. Click the plus button to add one!.
-                </p>
-              )}
-            </>
-          )}
-          {title === "Folders" && (
-            <>
-              <NoteLists items={folders} title={title} />
-              {folders.length === 0 && (
-                <p className=" text-slate-400 text-sm font-medium text-center mt-4">
-                  No {title} yet. Click the plus button to add one!. Folders
-                  help you organize your notes.
-                </p>
-              )}
-            </>
-          )}
-        </div>
+                {notesWithoutFolder.length > 0 && activeFolderId && (
+                  <div className="border-b border-slate-200 my-5" />
+                )}
+
+                {/* Notes without Folder */}
+                {notesWithoutFolder.length > 0 && (
+                  <div
+                    className={`space-y-1 ${isDragging2 ? "border border-slate-100 dark:border-slate-800" : ""}`}
+                    onDragOver={(e) => {
+                      isDropTarget && e.preventDefault();
+                    }}
+                    onDragEnter={() => {
+                      setIsDragging2(true);
+                      dragCounter.current++;
+                    }}
+                    onDragLeave={() => {
+                      dragCounter.current--;
+                      if (dragCounter.current === 0) {
+                        setIsDragging2(false);
+                      }
+                    }}
+                  >
+                    <p className="text-[10px] font-light text-slate-400 capitalize tracking-widest truncate mb-2 pl-4">
+                      Unfolderized Notes
+                    </p>
+                    <NoteLists
+                      items={notesWithoutFolder}
+                      title={title}
+                      onDragStart={(e, id) => handleDragStart(e, id)}
+                      onDrop={(e) => {
+                        handleDropRemoveNoteFromFolder(e);
+                        setIsDragging2(false);
+                        dragCounter.current = 0;
+                      }}
+                    />
+                  </div>
+                )}
+
+                {notesWithoutFolder.length === 0 && !activeFolderId && (
+                  <p className=" text-slate-400 text-sm font-medium text-center mt-4">
+                    No {title} yet. Click the plus button to add one!.
+                  </p>
+                )}
+              </>
+            )}
+            {title === "Folders" && (
+              <>
+                <NoteLists items={folders} title={title} />
+                {folders.length === 0 && (
+                  <p className=" text-slate-400 text-sm font-medium text-center mt-4">
+                    No {title} yet. Click the plus button to add one!. Folders
+                    help you organize your notes.
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

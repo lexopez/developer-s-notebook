@@ -1,23 +1,26 @@
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { FileText, Folder, Plus } from "lucide-react";
 import { setActiveDrawer } from "../store/notesSlice";
-import { useDispatch, useSelector } from "react-redux";
+
+import { useFolders } from "../hooks/folders/useFolders";
+import { useNotes } from "../hooks/notes/useNotes";
 import { SidebarList } from "./SidebarList";
 import MainContent from "./MainContent";
 import MobileHeader from "./MobileHeader";
-import { useState } from "react";
 import MobileDrawer from "./MobileDrawer";
+import SpinnerPage from "./SpinnerPage";
 
 export const MainLayout = () => {
   const dispatch = useDispatch();
-  const { folders, notes, activeNoteId, activeDrawer } = useSelector(
-    (state) => state.notes,
-  );
+  const { activeDrawer } = useSelector((state) => state.notes);
 
-  const currentNote = notes.find((n) => n.id === activeNoteId);
+  const { folders, isLoading: isFetchingFolders } = useFolders();
+  const { notes, isLoading: isFetchingNotes } = useNotes();
 
-  // Mobile UI State
-  // const [activeDrawer, setActiveDrawer] = useState(null); // 'folders' | 'notes' | 'menu' | null
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  if (isFetchingFolders || isFetchingNotes) return <SpinnerPage />;
 
   return (
     <div className="h-screen w-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300 overflow-hidden flex flex-col lg:flex-row lg:px-[5vw] lg:py-[5vh]">
@@ -31,9 +34,9 @@ export const MainLayout = () => {
 
       {/* MAIN EDITOR (Full width on mobile) */}
       <MainContent
-        currentNote={currentNote}
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
+        notes={notes}
       />
 
       {/* RIGHT SIDEBAR: FOLDERS (Hidden on mobile) */}

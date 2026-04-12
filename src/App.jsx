@@ -1,18 +1,24 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { MainLayout } from "./components/MainLayout";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { fetchFolders, fetchNotes } from "./store/newStore";
+import ProtectedApp from "./components/ProtectedApp";
+import AuthPage from "./components/AuthPage";
 
 function App() {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    // Fire off both requests in parallel
-    dispatch(fetchFolders());
-    dispatch(fetchNotes());
-  }, [dispatch]);
-
-  return <MainLayout />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route
+          index
+          element={
+            <ProtectedApp>
+              <MainLayout />
+            </ProtectedApp>
+          }
+        />
+        <Route path="AuthPage" element={<AuthPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

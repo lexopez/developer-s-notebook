@@ -20,7 +20,7 @@ export default function MobileHeader() {
       <h1 className="font-bold text-slate-800 dark:text-white">DevNotebook</h1>
       <button
         onClick={() => dispatch(toggleTheme())}
-        className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg"
+        className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full border border-slate-700"
       >
         {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
       </button>

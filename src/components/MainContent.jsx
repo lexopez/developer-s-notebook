@@ -1,62 +1,29 @@
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import { BookOpen, Code, Hash, Rocket, Search, StickyNote } from "lucide-react";
+
 import MainNav from "./MainNav";
 import SearchBar from "./SearchBar";
 import ModalButton from "./ModalButton";
 import NoteItems from "./NoteItems";
 import { SmartNoteForm } from "./SmartNoteForm";
 import MainModalForm from "./MainModalForm";
+import { useFolders } from "../hooks/folders/useFolders";
+import { filterItems, getActiveContent } from "../helpers/notesAction";
 
-export default function MainContent({
-  currentNote,
-  isModalOpen,
-  setIsModalOpen,
-}) {
-  const { activeFolderId, activeNoteId, activeCategory, folders } = useSelector(
+export default function MainContent({ notes, isModalOpen, setIsModalOpen }) {
+  const { activeFolderId, activeNoteId, activeCategory } = useSelector(
     (state) => state.notes,
   );
 
-  const currentFolder = folders.find((f) => f.id === activeFolderId);
+  const { folders } = useFolders();
   const [searchQuery, setSearchQuery] = useState("");
-  // const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const getActiveContent = () => {
-    if (!currentNote) return [];
-    if (activeCategory === "all") {
-      return Object.values(currentNote.data).flat();
-    }
-    return currentNote.data[activeCategory] || [];
-  };
+  const currentNote = notes?.find((n) => n.id === activeNoteId);
+  const currentFolder = folders.find((f) => f.id === activeFolderId);
 
-  const contentToDisplay = getActiveContent();
-
-  const filterItems = (items) => {
-    if (!searchQuery.trim()) return items;
-
-    // 1. Split the query into lowercase words and remove empty strings
-    const keywords = searchQuery
-      .toLowerCase()
-      .split(/\s+/)
-      .filter((word) => word.length > 0);
-
-    return items.filter((item) => {
-      // 2. Identify the target string based on the category structure
-      const targetString = (
-        item.label ||
-        item.title ||
-        item.name ||
-        ""
-      ).toLowerCase();
-
-      // 3. "Every" keyword must be present in the target string
-      // .includes() checks if the word exists, regardless of where it is
-      return keywords.every((word) => targetString.includes(word));
-    });
-  };
-
-  // 2. Determine what to display based on category AND search
-  const filteredContent = filterItems(contentToDisplay);
+  const contentToDisplay = getActiveContent(currentNote, activeCategory);
+  const filteredContent = filterItems(contentToDisplay, searchQuery);
 
   const categories = [
     { id: "all", label: "All", icon: <Hash size={16} /> },
@@ -74,7 +41,9 @@ export default function MainContent({
         {currentNote ? (
           <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
             <p className="lg:hidden text-slate-500 dark:text-slate-400 text-xs capitalize">
-              {currentFolder ? `${currentFolder.name} folder / ` : ""}
+              {currentFolder && currentFolder.id === currentNote.folder_id
+                ? `${currentFolder.name} folder / `
+                : ""}
               {currentNote.title.length > 30
                 ? currentNote.title.slice(0, 30) + "..."
                 : currentNote.title}
@@ -111,6 +80,7 @@ export default function MainContent({
                       .map((cat) => {
                         const items = filterItems(
                           currentNote.data[cat.id] || [],
+                          searchQuery,
                         );
                         if (items.length === 0) return null;
                         return (
@@ -119,7 +89,7 @@ export default function MainContent({
                             <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
                               <div className="text-cyan-500">{cat.icon}</div>
                               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                                {cat.label}
+                                {cat.label} asdf
                               </span>
                               {/* The Count Badge */}
                               <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-500">
@@ -156,12 +126,9 @@ export default function MainContent({
               <>
                 <p className="text-slate-400 text-sm font-medium text-center mb-4">
                   No Notes found for {activeCategory} category.{" "}
-                  <span className="lg:hidden">
+                  <span>
                     Please create a new note by clicking the plus(+) button
                     below
-                  </span>
-                  <span className="hidden lg:block">
-                    Please create a new note by filling out the form below.
                   </span>
                 </p>
                 <div className="hidden lg:flex flex-col items-center justify-center">
@@ -182,11 +149,7 @@ export default function MainContent({
                       </button>
                     </>
                   ) : (
-                    <SmartNoteForm
-                      activeCategory={activeCategory}
-                      activeNoteId={activeNoteId}
-                      activeFolderId={activeFolderId}
-                    />
+                    <ModalButton setIsModalOpen={setIsModalOpen} />
                   )}
                 </div>
               </>
@@ -194,35 +157,22 @@ export default function MainContent({
           </div>
         ) : (
           <>
-            <p className="text-slate-400 text-sm font-medium text-center">
-              No Notes found.{" "}
-              <span className="lg:hidden">
-                Please create a new note by clicking the plus(+) button below
-              </span>
-              <span className="hidden lg:block">
-                Please create a new note by filling out the form below.
+            <p className="text-slate-400 text-sm font-medium text-center mb-4">
+              <span>
+                Please select a note label or create a new note by clicking the
+                plus(+) button below
               </span>
             </p>
-            <div className="h-full hidden lg:flex items-center justify-center">
-              <SmartNoteForm
-                activeFolderId={activeFolderId}
-                activeNoteId={activeNoteId}
-                activeCategory={activeCategory}
-              />
+            <div className="hidden lg:flex items-center justify-center">
+              <ModalButton setIsModalOpen={setIsModalOpen} />
             </div>
           </>
-          /* No Note or No Folder selected - Render Global Form */
         )}
 
         {/* Modal Version of the Form */}
         {isModalOpen && (
           <MainModalForm setIsModalOpen={setIsModalOpen}>
-            <SmartNoteForm
-              activeFolderId={activeFolderId}
-              activeNoteId={activeNoteId}
-              activeCategory={activeCategory}
-              onSuccess={() => setIsModalOpen(false)}
-            />
+            <SmartNoteForm closeModal={() => setIsModalOpen(false)} />
           </MainModalForm>
         )}
       </section>

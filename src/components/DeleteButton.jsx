@@ -1,7 +1,7 @@
 import { Check, X, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-export default function DeleteButton({ handleDelete }) {
+export default function DeleteButton({ handleDelete, isDeleting }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   return (
@@ -36,8 +36,13 @@ export default function DeleteButton({ handleDelete }) {
             setShowDeleteConfirm(true);
           }}
           className="p-2 bg-slate-100 dark:bg-slate-800 lg:text-slate-400 text-red-500 lg:hover:text-red-500 rounded-xl transition-colors cursor-pointer"
+          disabled={isDeleting}
         >
-          <Trash2 size={14} />
+          {isDeleting ? (
+            <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin m-auto" />
+          ) : (
+            <Trash2 size={14} />
+          )}
         </button>
       )}
     </>

@@ -53,7 +53,7 @@ export default function AuthPage() {
           >
             <img
               src="https://www.google.com/favicon.ico"
-              className="w-4"
+              className="w-7"
               alt="G"
             />{" "}
             Google

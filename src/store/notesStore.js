@@ -1,5 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const getInitialTheme = () => {
+  const savedTheme = localStorage.getItem("theme");
+  if (savedTheme) return savedTheme;
+
+  // Optional: Check system preference if no saved theme exists
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+};
+
 const notesSlice = createSlice({
   name: "notes",
   initialState: {
@@ -7,7 +17,7 @@ const notesSlice = createSlice({
     activeNoteId: null,
     activeCategory: "all",
     activeDrawer: null, // "folders" or "notes" for mobile view
-    theme: "dark",
+    theme: getInitialTheme(),
   },
   reducers: {
     setActiveDrawer: (state, action) => {

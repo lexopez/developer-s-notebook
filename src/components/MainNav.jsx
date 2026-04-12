@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setCategory, toggleTheme } from "../store/newStore";
+import { setCategory, toggleTheme } from "../store/notesStore";
 import {
   BookOpen,
   Code,
@@ -61,7 +61,7 @@ export default function MainNav() {
         <div className="flex items-center gap-2 pr-2 border-r border-slate-500">
           <div className="text-right hidden sm:block">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              {fullName.slice(0, 3) + "...@gmail.com"}
+              {fullName?.slice(0, 3) + "...@gmail.com"}
             </p>
           </div>
 

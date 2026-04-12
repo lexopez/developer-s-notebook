@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addFolder as addFolderApi } from "@/service/apiFolders";
-import { useAddNote } from "../notes/useAddNote";
 import { useDispatch } from "react-redux";
+import { useAddNote } from "../notes/useAddNote";
 import { setActiveFolder, setActiveNote } from "../../store/notesStore";
 import toast from "react-hot-toast";
 import { useUser } from "../user/useAuth";

@@ -1,5 +1,5 @@
-import { Check, X, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { Check, X, Trash2 } from "lucide-react";
 
 export default function DeleteButton({ handleDelete, isDeleting }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);

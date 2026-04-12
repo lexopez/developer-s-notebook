@@ -1,30 +1,18 @@
 import { Plus, X } from "lucide-react";
 import { useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
+
 import NoteLists from "./NoteLists";
 import { useAddFolder } from "../hooks/folders/useAddFolder";
 import { useAddNote } from "../hooks/notes/useAddNote";
 import { useUpdateNoteFolderId } from "../hooks/notes/useUpdateNoteFolderId";
 import { useFolders } from "../hooks/folders/useFolders";
 import { useNotes } from "../hooks/notes/useNotes";
-import toast from "react-hot-toast";
 
 export const SidebarList = ({ title, isDropTarget = true }) => {
-  const {
-    createFolder,
-    error: createFolderError,
-    isPending: isCreatingFolder,
-  } = useAddFolder();
-  const {
-    createNote,
-    error: createNoteError,
-    isPending: isCreatingnote,
-  } = useAddNote();
-  const {
-    folderizeUnfolderizeNote,
-    error: updateNoteError,
-    isPending: isUpdatingNote,
-  } = useUpdateNoteFolderId();
+  const { createFolder } = useAddFolder();
+  const { createNote } = useAddNote();
+  const { folderizeUnfolderizeNote } = useUpdateNoteFolderId();
 
   const { folders, isLoading: isFetchingFolders } = useFolders();
   const { notes, isLoading: isFetchingNotes } = useNotes();
@@ -124,7 +112,6 @@ export const SidebarList = ({ title, isDropTarget = true }) => {
             {title === "Note Labels" && (
               <>
                 {/* Notes with Folder */}
-
                 <div
                   className={`space-y-1 ${isDragging1 ? "border border-slate-100 dark:border-slate-800" : ""}`}
                   onDragOver={(e) => {
@@ -162,7 +149,14 @@ export const SidebarList = ({ title, isDropTarget = true }) => {
                     />
                   )}
                   {notesWithFolder.length === 0 && activeFolderId && (
-                    <p className="text-slate-400 text-sm font-medium px-4">
+                    <p
+                      className="text-slate-400 text-sm font-medium px-4"
+                      onDrop={(e) => {
+                        handleDropAddNoteToFolder(e);
+                        setIsDragging1(false);
+                        dragCounter.current = 0;
+                      }}
+                    >
                       Create new Note label using the plus button or Drag and
                       drop here existing notes from unfolderized Note labels to
                       add them to th current folder.

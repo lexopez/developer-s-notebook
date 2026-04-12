@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
+
 import { Favicon } from "./Favicon";
 import { useUpdateNoteData } from "../hooks/notes/useUpdateNoteData";
 import { useNotes } from "../hooks/notes/useNotes";
 import { useAddFolder } from "../hooks/folders/useAddFolder";
 import { useAddNote } from "../hooks/notes/useAddNote";
-import toast from "react-hot-toast";
 
 export const SmartNoteForm = ({ closeModal }) => {
   const { activeCategory, activeNoteId, activeFolderId } = useSelector(

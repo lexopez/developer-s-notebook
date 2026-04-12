@@ -1,13 +1,14 @@
 import { useState } from "react";
-import EditButton from "./EditButton";
-import DeleteButton from "./DeleteButton";
 import { useDispatch, useSelector } from "react-redux";
 import { FileText, Folder, GripVertical } from "lucide-react";
 import {
   setActiveDrawer,
   setActiveFolder,
   setActiveNote,
-} from "../store/newStore";
+} from "../store/notesStore";
+
+import EditButton from "./EditButton";
+import DeleteButton from "./DeleteButton";
 import { useDeleteNote } from "../hooks/notes/useDeleteNote";
 import { useDeleteFolder } from "../hooks/folders/useDeleteFolder";
 import { useRenameNote } from "../hooks/notes/useRenameNote";
@@ -29,9 +30,6 @@ export default function NoteLists({ items, title, onDragStart, onDrop }) {
   } = useDeleteFolder();
   const { changeNoteName } = useRenameNote();
   const { changeFolderName } = useRenameFolder();
-
-  // const isDeletingThisNote = isDeletingNote && variables === note.id;
-  // const isDeletingThisFolder = isDeletingFolder && variables === note.id;
 
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");

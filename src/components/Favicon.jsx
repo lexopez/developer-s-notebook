@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { getDomain } from "../helpers/getDomain";
 import { Globe } from "lucide-react";
+import { getDomain } from "../helpers/getDomain";
 
 export const Favicon = ({ url, size = 32 }) => {
   const domain = getDomain(url);

@@ -1,13 +1,14 @@
-import { Maximize2, X, Edit3, Eye } from "lucide-react";
 import { useState } from "react";
 import { useSelector } from "react-redux"; // Assuming you have delete/update actions
+import { Maximize2, X, Edit3, Eye } from "lucide-react";
+import toast from "react-hot-toast";
+
+import { useNotes } from "../hooks/notes/useNotes";
+import { useUpdateNoteData } from "../hooks/notes/useUpdateNoteData";
 import { CodeBlock } from "./CodeBlock";
 import { Favicon } from "./Favicon";
 import DeleteButton from "./DeleteButton";
 import EditButton from "./EditButton";
-import { useNotes } from "../hooks/notes/useNotes";
-import { useUpdateNoteData } from "../hooks/notes/useUpdateNoteData";
-import toast from "react-hot-toast";
 
 export const ContentItem = ({ item, category }) => {
   const { activeNoteId } = useSelector((state) => state.notes);
@@ -17,7 +18,6 @@ export const ContentItem = ({ item, category }) => {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Edit State
   const [editMode, setEditMode] = useState("view"); // "view" or "edit"
   const [tempData, setTempData] = useState({ ...item });
 
@@ -76,7 +76,6 @@ export const ContentItem = ({ item, category }) => {
       return;
     }
 
-    // const cat = activeCategory === "all" ? "notes" : activeCategory;
     const activeNote = notes.find((n) => n.id === activeNoteId);
     if (!activeNote) return;
 
@@ -108,7 +107,6 @@ export const ContentItem = ({ item, category }) => {
 
   return (
     <>
-      {/* GRID CARD */}
       <div
         onClick={() => isExpandable && setIsExpanded(true)}
         className={`group relative p-5 h-32 flex flex-col justify-between rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 transition-all hover:border-cyan-500/50 hover:shadow-lg ${category !== "side projects" && category !== "resources" ? "cursor-pointer" : ""}`}

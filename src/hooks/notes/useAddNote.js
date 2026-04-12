@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addNote as addNoteApi } from "@/service/apiNotes";
 import { useDispatch } from "react-redux";
-import { setActiveNote } from "../../store/notesStore";
 import toast from "react-hot-toast";
+import { setActiveNote } from "@/store/notesStore";
 import { useUser } from "../user/useAuth";
 
 export function useAddNote() {

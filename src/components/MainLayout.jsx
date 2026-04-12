@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FileText, Folder, Plus } from "lucide-react";
-import { setActiveDrawer } from "../store/notesSlice";
+import { setActiveDrawer } from "../store/notesStore";
 
 import { useFolders } from "../hooks/folders/useFolders";
 import { useNotes } from "../hooks/notes/useNotes";

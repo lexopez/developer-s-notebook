@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getNotes } from "../../service/apiNotes";
+import { getNotes } from "@/service/apiNotes";
 import { useUser } from "../user/useAuth";
 
 // Hook to fetch all notes

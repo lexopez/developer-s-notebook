@@ -159,8 +159,8 @@ export default function MainContent({ notes, isModalOpen, setIsModalOpen }) {
           <>
             <p className="text-slate-400 text-sm font-medium text-center mb-4">
               <span>
-                Please select a note label or create a new note by clicking the
-                plus(+) button below
+                Please select a note label/Folder or create a new note by
+                clicking the plus(+) button below
               </span>
             </p>
             <div className="hidden lg:flex items-center justify-center">

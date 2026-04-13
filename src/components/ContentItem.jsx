@@ -9,10 +9,12 @@ import { CodeBlock } from "./CodeBlock";
 import { Favicon } from "./Favicon";
 import DeleteButton from "./DeleteButton";
 import EditButton from "./EditButton";
+import { useCategories } from "../hooks/useCategories";
 
 export const ContentItem = ({ item, category }) => {
   const { activeNoteId } = useSelector((state) => state.notes);
 
+  const { existingCategories } = useCategories();
   const { notes } = useNotes();
   const { editNoteData, isPending: isUpdatingNoteData } = useUpdateNoteData();
 
@@ -80,7 +82,15 @@ export const ContentItem = ({ item, category }) => {
     if (!activeNote) return;
 
     const newData = activeNote.data[category].map((i) =>
-      i.id === item.id ? { ...i, ...tempData } : i,
+      i.id === item.id
+        ? {
+            ...i,
+            ...tempData,
+            ...(category === "resources" && {
+              category: tempData.category || "Uncategorized",
+            }),
+          }
+        : i,
     );
 
     const updatedItem = {
@@ -207,6 +217,28 @@ export const ContentItem = ({ item, category }) => {
                     {category === "all" ? "Notes" : category}
                   </span>
                 </div>
+                {category === "resources" && (
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                      Category (optional)
+                    </label>
+                    <input
+                      name="category"
+                      list="category-suggestions"
+                      placeholder="Category (Optional)"
+                      className="focus:ring-2 focus:ring-cyan-500/20 border border-transparent focus:border-cyan-500/50 w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
+                      value={tempData.category}
+                      onChange={(e) =>
+                        setTempData({ ...tempData, category: e.target.value })
+                      }
+                    />
+                    <datalist id="category-suggestions">
+                      {existingCategories.map((cat) => (
+                        <option key={cat} value={cat} />
+                      ))}
+                    </datalist>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
                     Title / Label

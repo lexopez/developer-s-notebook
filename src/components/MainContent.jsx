@@ -10,12 +10,14 @@ import { SmartNoteForm } from "./SmartNoteForm";
 import MainModalForm from "./MainModalForm";
 import { useFolders } from "../hooks/folders/useFolders";
 import { filterItems, getActiveContent } from "../helpers/notesAction";
+import { useGroupedResources } from "../hooks/useGroupedResources";
 
 export default function MainContent({ notes, isModalOpen, setIsModalOpen }) {
   const { activeFolderId, activeNoteId, activeCategory } = useSelector(
     (state) => state.notes,
   );
 
+  const { groupedResources } = useGroupedResources();
   const { folders } = useFolders();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -89,7 +91,7 @@ export default function MainContent({ notes, isModalOpen, setIsModalOpen }) {
                             <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
                               <div className="text-cyan-500">{cat.icon}</div>
                               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                                {cat.label} asdf
+                                {cat.label}
                               </span>
                               {/* The Count Badge */}
                               <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-500">
@@ -115,10 +117,37 @@ export default function MainContent({ notes, isModalOpen, setIsModalOpen }) {
                         Showing {filteredContent.length} items
                       </span>
                     </div>
-                    <NoteItems
-                      filteredContent={filteredContent}
-                      activeCategory={activeCategory}
-                    />
+                    {activeCategory !== "resources" && (
+                      <NoteItems
+                        filteredContent={filteredContent}
+                        activeCategory={activeCategory}
+                      />
+                    )}
+                    {activeCategory === "resources" && (
+                      <div className="mt-6 space-y-8">
+                        {Object.entries(groupedResources).map(
+                          ([category, items]) => (
+                            <div key={category} className="space-y-3">
+                              <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                                  {category}
+                                </span>
+                                {/* The Count Badge */}
+                                <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                  {items.length}
+                                </span>
+                                <div className="flex-1 h-[1px] bg-gradient-to-r from-slate-100 dark:from-slate-800 to-transparent"></div>
+                              </div>
+
+                              <NoteItems
+                                filteredContent={items}
+                                activeCategory={activeCategory}
+                              />
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -7,12 +7,13 @@ import { useUpdateNoteData } from "../hooks/notes/useUpdateNoteData";
 import { useNotes } from "../hooks/notes/useNotes";
 import { useAddFolder } from "../hooks/folders/useAddFolder";
 import { useAddNote } from "../hooks/notes/useAddNote";
+import { useCategories } from "../hooks/useCategories";
 
 export const SmartNoteForm = ({ closeModal }) => {
   const { activeCategory, activeNoteId, activeFolderId } = useSelector(
     (state) => state.notes,
   );
-
+  const { existingCategories } = useCategories();
   const { notes } = useNotes();
   const { editNoteData, isPending: isUpdatingNoteData } = useUpdateNoteData();
   const { createFolder, isPending: isCreatingFolder } = useAddFolder();
@@ -51,6 +52,7 @@ export const SmartNoteForm = ({ closeModal }) => {
       },
       resources: {
         required: ["name", "url"],
+        optional: ["category"],
       },
       default: {
         required: ["title", "text"],
@@ -73,16 +75,22 @@ export const SmartNoteForm = ({ closeModal }) => {
     if (formData.url && formData.url.trim().length > 2000) return;
     if (formData.title && formData.title.trim().length > 100) return;
     if (formData.text && formData.text.trim().length > 5000) return;
+    if (formData.category && formData.category.trim().length > 100) return;
 
     // Assign required fields dynamically
     config.required.forEach((field) => {
       itemData[field] = formData[field];
     });
 
-    // let noteData;
     const activeNote = notes.find((n) => n.id === activeNoteId);
+    const dataObj = {
+      ...itemData,
+      ...(cat === "resources" && {
+        category: formData.category || "Uncategorized",
+      }),
+      id: crypto.randomUUID(),
+    };
 
-    // Optional fields
     if (
       !activeFolderId &&
       !activeNoteId &&
@@ -92,7 +100,9 @@ export const SmartNoteForm = ({ closeModal }) => {
       createFolder({
         folderName: formData.folderName,
         noteTitle: formData.noteTitle,
-        itemData: { [cat]: [{ ...itemData, id: crypto.randomUUID() }] },
+        itemData: {
+          [cat]: [dataObj],
+        },
       });
       closeModal?.();
     }
@@ -106,19 +116,17 @@ export const SmartNoteForm = ({ closeModal }) => {
       createNote({
         title: formData.noteTitle,
         folderId: activeFolderId,
-        itemData: { [cat]: [{ ...itemData, id: crypto.randomUUID() }] },
+        itemData: {
+          [cat]: [dataObj],
+        },
       });
       closeModal?.();
     }
 
     if (activeNoteId) {
-      // 1. Create a deep copy of the current data
       const updatedData = {
         ...activeNote.data,
-        [cat]: [
-          ...(activeNote.data[cat] || []),
-          { ...itemData, id: crypto.randomUUID() },
-        ],
+        [cat]: [...(activeNote.data[cat] || []), dataObj],
       };
 
       editNoteData(
@@ -209,11 +217,31 @@ export const SmartNoteForm = ({ closeModal }) => {
           {(activeCategory === "side projects" ||
             activeCategory === "resources") && (
             <>
+              {activeCategory === "resources" && (
+                <>
+                  <span className="text-[10px] font-light text-slate-400 capitalize tracking-widest mb-2">
+                    Category (Optional)
+                  </span>
+                  <input
+                    name="category"
+                    list="category-suggestions"
+                    placeholder="Category..."
+                    className="focus:ring-2 focus:ring-cyan-500/20 border border-transparent focus:border-cyan-500/50 w-full p-3 rounded-xl bg-slate-100 dark:text-slate-200 dark:bg-slate-900 outline-none"
+                    onChange={handleChange}
+                  />
+                  <datalist id="category-suggestions">
+                    {existingCategories.map((cat) => (
+                      <option key={cat} value={cat} />
+                    ))}
+                  </datalist>
+                </>
+              )}
               <span className="text-[10px] font-light text-slate-400 capitalize tracking-widest mb-2">
                 {activeCategory === "side projects"
                   ? "Project Name"
                   : "Resource Name"}
               </span>
+              {/* Category Input with Datalist */}
               <input
                 name="name"
                 placeholder="Name..."

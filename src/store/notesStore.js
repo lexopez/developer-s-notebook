@@ -16,6 +16,7 @@ const notesSlice = createSlice({
     activeFolderId: null,
     activeNoteId: null,
     activeCategory: "all",
+    activeResourcesCategory: "all",
     activeDrawer: null, // "folders" or "notes" for mobile view
     theme: getInitialTheme(),
   },
@@ -32,6 +33,9 @@ const notesSlice = createSlice({
     setCategory: (state, action) => {
       state.activeCategory = action.payload;
     },
+    setActiveResourcesCategory: (state, action) => {
+      state.activeResourcesCategory = action.payload;
+    },
     toggleTheme: (state) => {
       state.theme = state.theme === "light" ? "dark" : "light";
     },
@@ -42,6 +46,7 @@ export const {
   setActiveFolder,
   setActiveNote,
   setCategory,
+  setActiveResourcesCategory,
   setActiveDrawer,
   toggleTheme,
 } = notesSlice.actions;

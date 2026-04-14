@@ -1,4 +1,4 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
 import { BookOpen, Code, Hash, Rocket, Search, StickyNote } from "lucide-react";
 
@@ -10,14 +10,17 @@ import { SmartNoteForm } from "./SmartNoteForm";
 import MainModalForm from "./MainModalForm";
 import { useFolders } from "../hooks/folders/useFolders";
 import { filterItems, getActiveContent } from "../helpers/notesAction";
-import { useGroupedResources } from "../hooks/useGroupedResources";
+import { setActiveResourcesCategory } from "../store/notesStore";
 
 export default function MainContent({ notes, isModalOpen, setIsModalOpen }) {
-  const { activeFolderId, activeNoteId, activeCategory } = useSelector(
-    (state) => state.notes,
-  );
+  const dispatch = useDispatch();
+  const {
+    activeFolderId,
+    activeNoteId,
+    activeCategory,
+    activeResourcesCategory,
+  } = useSelector((state) => state.notes);
 
-  const { groupedResources } = useGroupedResources();
   const { folders } = useFolders();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -34,6 +37,26 @@ export default function MainContent({ notes, isModalOpen, setIsModalOpen }) {
     { id: "resources", label: "Resources", icon: <BookOpen size={16} /> },
     { id: "notes", label: "Just Notes", icon: <StickyNote size={16} /> },
   ];
+
+  const groupedResources = filteredContent.reduce((acc, resource) => {
+    const cat = resource.category || "Uncategorized";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(resource);
+    return acc;
+  }, {});
+
+  // Get unique categories for the filter buttons
+  const filterCategories = ["all", ...Object.keys(groupedResources)];
+
+  const filteredResources = Object.entries(groupedResources).filter(
+    ([category]) =>
+      activeResourcesCategory === "all" || activeResourcesCategory === category,
+  );
+
+  const items = filteredResources.map(([category, items]) =>
+    activeResourcesCategory === "all" ? items.map((items) => items) : items,
+  );
+  const countItems = items.flatMap((array) => array);
 
   return (
     <main className="flex-1 h-full bg-white dark:bg-slate-900 lg:rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col overflow-hidden">
@@ -114,7 +137,7 @@ export default function MainContent({ notes, isModalOpen, setIsModalOpen }) {
                   <div className="space-y-6">
                     <div className="flex items-center gap-2 mb-6">
                       <span className="px-3 py-1 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-bold">
-                        Showing {filteredContent.length} items
+                        Showing {countItems.length} items
                       </span>
                     </div>
                     {activeCategory !== "resources" && (
@@ -125,27 +148,61 @@ export default function MainContent({ notes, isModalOpen, setIsModalOpen }) {
                     )}
                     {activeCategory === "resources" && (
                       <div className="mt-6 space-y-8">
-                        {Object.entries(groupedResources).map(
-                          ([category, items]) => (
-                            <div key={category} className="space-y-3">
-                              <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                                  {category}
-                                </span>
-                                {/* The Count Badge */}
-                                <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-500">
-                                  {items.length}
-                                </span>
-                                <div className="flex-1 h-[1px] bg-gradient-to-r from-slate-100 dark:from-slate-800 to-transparent"></div>
-                              </div>
-
-                              <NoteItems
-                                filteredContent={items}
-                                activeCategory={activeCategory}
-                              />
+                        {/* 1. Filter Bar */}
+                        <div className="flex flex-wrap items-center gap-2 pb-4 border-b border-slate-200 dark:border-slate-800">
+                          <span className="text-xs font-bold uppercase text-slate-500 mr-2">
+                            Filter:
+                          </span>
+                          {filterCategories.map((cat) => (
+                            <button
+                              key={cat}
+                              onClick={() =>
+                                dispatch(setActiveResourcesCategory(cat))
+                              }
+                              className={`cursor-pointer px-3 py-1 rounded-full text-xs font-medium transition-all border ${
+                                activeResourcesCategory === cat
+                                  ? "bg-cyan-600 border-cyan-600 text-white shadow-lg shadow-cyan-500/20"
+                                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-cyan-500"
+                              }`}
+                            >
+                              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                            </button>
+                          ))}
+                        </div>
+                        {/* 2. Grouped List View */}
+                        {/* <div className="space-y-8 mt-4"> */}
+                        {filteredResources.map(([category, items]) => (
+                          <div
+                            key={category}
+                            className="animate-in fade-in slide-in-from-top-2 duration-300"
+                          >
+                            <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3 mb-3">
+                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+                                {category}
+                              </span>
+                              {/* The Count Badge */}
+                              <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                                {items.length}
+                              </span>
+                              <div className="flex-1 h-[1px] bg-gradient-to-r from-slate-100 dark:from-slate-800 to-transparent"></div>
                             </div>
-                          ),
+
+                            <NoteItems
+                              filteredContent={items}
+                              activeCategory={activeCategory}
+                            />
+                          </div>
+                        ))}
+
+                        {/* Empty State */}
+                        {Object.keys(groupedResources).length === 0 && (
+                          <div className="text-center py-10 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
+                            <p className="text-slate-500">
+                              No resources added yet.
+                            </p>
+                          </div>
                         )}
+                        {/* </div> */}
                       </div>
                     )}
                   </div>

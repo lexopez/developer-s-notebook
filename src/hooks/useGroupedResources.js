@@ -2,12 +2,12 @@ import { useMemo } from "react";
 import { useNotes } from "./notes/useNotes";
 import { useSelector } from "react-redux";
 
-export function useGroupedResources() {
+export function useResources() {
   const { notes } = useNotes();
   const { activeNoteId } = useSelector((state) => state.notes);
 
   // Logic to group resources
-  const groupedResources = useMemo(() => {
+  const groupedResourcesItems = useMemo(() => {
     const activeNote = notes.find((n) => n.id === activeNoteId);
 
     const resources = activeNote?.data?.resources || [];
@@ -30,5 +30,5 @@ export function useGroupedResources() {
       }, {});
   }, [activeNoteId, notes]);
 
-  return { groupedResources };
+  return { groupedResourcesItems };
 }

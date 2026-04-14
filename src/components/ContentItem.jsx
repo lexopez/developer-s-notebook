@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSelector } from "react-redux"; // Assuming you have delete/update actions
+import { useDispatch, useSelector } from "react-redux"; // Assuming you have delete/update actions
 import { Maximize2, X, Edit3, Eye } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -10,8 +10,10 @@ import { Favicon } from "./Favicon";
 import DeleteButton from "./DeleteButton";
 import EditButton from "./EditButton";
 import { useCategories } from "../hooks/useCategories";
+import { setActiveResourcesCategory } from "../store/notesStore";
 
 export const ContentItem = ({ item, category }) => {
+  const dispatch = useDispatch();
   const { activeNoteId } = useSelector((state) => state.notes);
 
   const { existingCategories } = useCategories();
@@ -41,7 +43,12 @@ export const ContentItem = ({ item, category }) => {
         id: activeNoteId,
         data: updatedItem,
       },
-      { onSuccess: () => toast.success("Note deleted!") },
+      {
+        onSuccess: () => {
+          toast.success("Note deleted!");
+          dispatch(setActiveResourcesCategory("all"));
+        },
+      },
     );
   };
 

@@ -26,9 +26,11 @@ const notesSlice = createSlice({
     },
     setActiveFolder: (state, action) => {
       state.activeFolderId = action.payload;
+      state.activeCategory = "all";
     },
     setActiveNote: (state, action) => {
       state.activeNoteId = action.payload;
+      state.activeResourcesCategory = "all";
     },
     setCategory: (state, action) => {
       state.activeCategory = action.payload;

@@ -137,7 +137,11 @@ export default function MainContent({ notes, isModalOpen, setIsModalOpen }) {
                   <div className="space-y-6">
                     <div className="flex items-center gap-2 mb-6">
                       <span className="px-3 py-1 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 text-xs font-bold">
-                        Showing {countItems.length} items
+                        Showing{" "}
+                        {activeCategory === "resources"
+                          ? countItems.length
+                          : filteredContent.length}{" "}
+                        items
                       </span>
                     </div>
                     {activeCategory !== "resources" && (

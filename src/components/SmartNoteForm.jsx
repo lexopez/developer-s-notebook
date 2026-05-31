@@ -74,7 +74,7 @@ export const SmartNoteForm = ({ closeModal }) => {
     if (formData.name && formData.name.trim().length > 100) return;
     if (formData.url && formData.url.trim().length > 2000) return;
     if (formData.title && formData.title.trim().length > 100) return;
-    if (formData.text && formData.text.trim().length > 5000) return;
+    if (formData.text && formData.text.trim().length > 10000) return;
     if (formData.category && formData.category.trim().length > 100) return;
 
     // Assign required fields dynamically

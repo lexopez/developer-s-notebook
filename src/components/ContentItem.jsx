@@ -78,7 +78,7 @@ export const ContentItem = ({ item, category }) => {
     if (tempData.name && tempData.name.trim().length > 100) return;
     if (tempData.url && tempData.url.trim().length > 2000) return;
     if (tempData.title && tempData.title.trim().length > 100) return;
-    if (tempData.text && tempData.text.trim().length > 5000) return;
+    if (tempData.text && tempData.text.trim().length > 100000) return;
 
     if (hasInvalidField) {
       console.warn("Validation failed:", tempData);
@@ -423,7 +423,7 @@ export const ContentItem = ({ item, category }) => {
                             e.target.value,
                         })
                       }
-                      maxLength={5000}
+                      maxLength={100000}
                       required
                     />
                   </div>
